@@ -1,0 +1,97 @@
+name: Sanctuary
+options:
+  bundleIdPrefix: com.sanctuary
+  deploymentTarget:
+    iOS: "18.0"
+  defaultConfig: Debug
+  xcodeVersion: "16.0"
+  
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    MARKETING_VERSION: "1.0.0"
+    CURRENT_PROJECT_VERSION: "1"
+    DEVELOPMENT_TEAM: YOUR_TEAM_ID
+    CODE_SIGN_STYLE: Automatic
+    SWIFT_STRICT_CONCURRENCY: complete
+    ENABLE_USER_SCRIPT_SANDBOXING: YES
+    
+configs:
+  Debug:
+    settings:
+      DEBUG_INFORMATION_FORMAT: dwarf-with-dsym
+      SWIFT_OPTIMIZATION_LEVEL: -Onone
+  Release:
+    settings:
+      DEBUG_INFORMATION_FORMAT: dwarf-with-dsym
+      SWIFT_OPTIMIZATION_LEVEL: -O
+      
+targets:
+  Sanctuary:
+    type: application
+    platform: iOS
+    sources:
+      - path: Sanctuary
+        excludes:
+          - "*.plist"
+    info:
+      path: Sanctuary/Info.plist
+    entitlements:
+      path: Sanctuary/Sanctuary.entitlements
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.sanctuary.app
+        INFOPLIST_FILE: Sanctuary/Info.plist
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        CODE_SIGN_ENTITLEMENTS: Sanctuary/Sanctuary.entitlements
+        LD_RUNPATH_SEARCH_PATHS: $(inherited) @executable_path/Frameworks
+    dependencies:
+      - target: SanctuaryWidget
+        embed: true
+        
+  SanctuaryWidget:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: SanctuaryWidget
+        excludes:
+          - "*.plist"
+    info:
+      path: SanctuaryWidget/Info.plist
+    entitlements:
+      path: SanctuaryWidget/SanctuaryWidget.entitlements
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.sanctuary.app.widget
+        INFOPLIST_FILE: SanctuaryWidget/Info.plist
+        CODE_SIGN_ENTITLEMENTS: SanctuaryWidget/SanctuaryWidget.entitlements
+        LD_RUNPATH_SEARCH_PATHS: $(inherited) @executable_path/Frameworks @executable_path/../../Frameworks
+        SKIP_INSTALL: YES
+        
+  SanctuaryTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - path: SanctuaryTests
+    dependencies:
+      - target: Sanctuary
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.sanctuary.app.tests
+        TEST_HOST: $(BUILT_PRODUCTS_DIR)/Sanctuary.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Sanctuary
+        BUNDLE_LOADER: $(TEST_HOST)
+
+schemes:
+  Sanctuary:
+    build:
+      targets:
+        Sanctuary: all
+        SanctuaryWidget: all
+    run:
+      config: Debug
+    test:
+      config: Debug
+      targets:
+        - SanctuaryTests
+    archive:
+      config: Release
