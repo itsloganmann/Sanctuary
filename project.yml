@@ -36,6 +36,25 @@ targets:
           - "*.plist"
     info:
       path: Sanctuary/Info.plist
+      properties:
+        UILaunchScreen:
+          UIColorName: LaunchScreenBackground
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
+        UISupportedInterfaceOrientations~ipad:
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationPortraitUpsideDown
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
+        UIBackgroundModes:
+          - location
+          - fetch
+          - remote-notification
+        NSCameraUsageDescription: "Sanctuary needs camera access to scan QR codes for partner linking"
+        NSLocationWhenInUseUsageDescription: "Sanctuary uses your location to share with trusted contacts during safety monitoring"
+        NSLocationAlwaysAndWhenInUseUsageDescription: "Sanctuary needs always-on location access to monitor your safety and alert contacts if needed"
     entitlements:
       path: Sanctuary/Sanctuary.entitlements
     settings:
@@ -58,6 +77,9 @@ targets:
           - "*.plist"
     info:
       path: SanctuaryWidget/Info.plist
+      properties:
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension
     entitlements:
       path: SanctuaryWidget/SanctuaryWidget.entitlements
     settings:

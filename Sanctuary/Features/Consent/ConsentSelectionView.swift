@@ -21,93 +21,7 @@ struct ConsentSelectionView: View {
                 Color.sanctuaryBlack
                     .ignoresSafeArea()
                 
-                VStack(spacing: DesignTokens.spacingLarge) {
-                    // Progress indicator
-                    ProgressView(value: Double(currentIndex), total: Double(boundaries.count))
-                        .tint(.safetyOrange)
-                        .padding(.horizontal)
-                    
-                    // Instructions
-                    VStack(spacing: DesignTokens.spacingSmall) {
-                        Text("Set Your Boundaries")
-                            .font(.displaySmall)
-                            .foregroundStyle(.white)
-                        
-                        Text("Swipe right to consent, left to decline")
-                            .font(.bodyMedium)
-                            .foregroundStyle(.textSecondary)
-                    }
-                    
-                    // Card Stack
-                    ZStack {
-                        ForEach(boundaries.indices.reversed(), id: \.self) { index in
-                            if index >= currentIndex && index < currentIndex + 3 {
-                                ConsentCard(
-                                    card: boundaries[index],
-                                    isTop: index == currentIndex
-                                ) { direction in
-                                    handleSwipe(at: index, direction: direction)
-                                }
-                                .offset(y: CGFloat(index - currentIndex) * 8)
-                                .scaleEffect(1 - CGFloat(index - currentIndex) * 0.05)
-                                .zIndex(Double(boundaries.count - index))
-                            }
-                        }
-                        
-                        if currentIndex >= boundaries.count {
-                            // All done
-                            VStack(spacing: DesignTokens.spacingMedium) {
-                                Image(systemName: "checkmark.circle.fill")
-                                    .font(.system(size: 60))
-                                    .foregroundStyle(.statusSafe)
-                                
-                                Text("All Set!")
-                                    .font(.displaySmall)
-                                    .foregroundStyle(.white)
-                            }
-                        }
-                    }
-                    .frame(height: 400)
-                    .padding(.horizontal)
-                    
-                    Spacer()
-                    
-                    // Action buttons
-                    HStack(spacing: DesignTokens.spacingXLarge) {
-                        // Decline button
-                        Button {
-                            if currentIndex < boundaries.count {
-                                handleSwipe(at: currentIndex, direction: .left)
-                            }
-                        } label: {
-                            Circle()
-                                .fill(Color.statusDanger.opacity(0.2))
-                                .frame(width: 64, height: 64)
-                                .overlay(
-                                    Image(systemName: "xmark")
-                                        .font(.title2.bold())
-                                        .foregroundStyle(.statusDanger)
-                                )
-                        }
-                        
-                        // Accept button
-                        Button {
-                            if currentIndex < boundaries.count {
-                                handleSwipe(at: currentIndex, direction: .right)
-                            }
-                        } label: {
-                            Circle()
-                                .fill(Color.statusSafe.opacity(0.2))
-                                .frame(width: 64, height: 64)
-                                .overlay(
-                                    Image(systemName: "checkmark")
-                                        .font(.title2.bold())
-                                        .foregroundStyle(.statusSafe)
-                                )
-                        }
-                    }
-                    .padding(.bottom, DesignTokens.spacingLarge)
-                }
+                mainContent
             }
             .navigationTitle("Boundaries")
             .navigationBarTitleDisplayMode(.inline)
@@ -116,20 +30,129 @@ struct ConsentSelectionView: View {
                     Button("Cancel") {
                         dismiss()
                     }
-                    .foregroundStyle(.textSecondary)
+                    .foregroundStyle(Color.textSecondary)
                 }
                 
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Review") {
                         showingReview = true
                     }
-                    .foregroundStyle(.safetyOrange)
+                    .foregroundStyle(Color.safetyOrange)
                 }
             }
             .sheet(isPresented: $showingReview) {
                 BoundaryReviewView(boundaries: boundaries)
             }
         }
+    }
+    
+    private var mainContent: some View {
+        VStack(spacing: DesignTokens.spacingLarge) {
+            // Progress indicator
+            ProgressView(value: Double(currentIndex), total: Double(boundaries.count))
+                .tint(Color.safetyOrange)
+                .padding(.horizontal)
+            
+            // Instructions
+            VStack(spacing: DesignTokens.spacingSmall) {
+                Text("Set Your Boundaries")
+                    .font(.displaySmall)
+                    .foregroundStyle(.white)
+                
+                Text("Swipe right to consent, left to decline")
+                    .font(.bodyMedium)
+                    .foregroundStyle(Color.textSecondary)
+            }
+            
+            // Card Stack
+            cardStackView
+            
+            Spacer()
+            
+            // Action buttons
+            actionButtons
+        }
+    }
+    
+    private var cardStackView: some View {
+        ZStack {
+            ForEach(boundaries.indices.reversed(), id: \.self) { index in
+                if index >= currentIndex && index < currentIndex + 3 {
+                    ConsentCard(
+                        card: boundaries[index],
+                        isTop: index == currentIndex
+                    ) { direction in
+                        handleSwipe(at: index, direction: direction)
+                    }
+                    .offset(y: CGFloat(index - currentIndex) * 8)
+                    .scaleEffect(1 - CGFloat(index - currentIndex) * 0.05)
+                    .zIndex(Double(boundaries.count - index))
+                }
+            }
+            
+            if currentIndex >= boundaries.count {
+                completedView
+            }
+        }
+        .frame(height: 400)
+        .padding(.horizontal)
+    }
+    
+    private var completedView: some View {
+        VStack(spacing: DesignTokens.spacingMedium) {
+            Image(systemName: "checkmark.circle.fill")
+                .font(.system(size: 60))
+                .foregroundStyle(Color.statusSafe)
+            
+            Text("All Set!")
+                .font(.displaySmall)
+                .foregroundStyle(.white)
+        }
+    }
+    
+    private var actionButtons: some View {
+        HStack(spacing: DesignTokens.spacingXLarge) {
+            // Decline button
+            Button {
+                if currentIndex < boundaries.count {
+                    handleSwipe(at: currentIndex, direction: .left)
+                }
+            } label: {
+                declineButtonLabel
+            }
+            
+            // Accept button
+            Button {
+                if currentIndex < boundaries.count {
+                    handleSwipe(at: currentIndex, direction: .right)
+                }
+            } label: {
+                acceptButtonLabel
+            }
+        }
+        .padding(.bottom, DesignTokens.spacingLarge)
+    }
+    
+    private var declineButtonLabel: some View {
+        Circle()
+            .fill(Color.statusDanger.opacity(0.2))
+            .frame(width: 64, height: 64)
+            .overlay(
+                Image(systemName: "xmark")
+                    .font(.title2.bold())
+                    .foregroundStyle(Color.statusDanger)
+            )
+    }
+    
+    private var acceptButtonLabel: some View {
+        Circle()
+            .fill(Color.statusSafe.opacity(0.2))
+            .frame(width: 64, height: 64)
+            .overlay(
+                Image(systemName: "checkmark")
+                    .font(.title2.bold())
+                    .foregroundStyle(Color.statusSafe)
+            )
     }
     
     private func handleSwipe(at index: Int, direction: SwipeDirection) {
@@ -257,7 +280,7 @@ struct ConsentCard: View {
                     
                     Text(card.description)
                         .font(.bodyMedium)
-                        .foregroundStyle(.textSecondary)
+                        .foregroundStyle(Color.textSecondary)
                         .multilineTextAlignment(.center)
                         .lineLimit(3)
                 }
@@ -268,7 +291,7 @@ struct ConsentCard: View {
                     // Decline indicator
                     Image(systemName: "xmark.circle.fill")
                         .font(.system(size: 50))
-                        .foregroundStyle(.statusDanger)
+                        .foregroundStyle(Color.statusDanger)
                         .opacity(offset.width < -30 ? Double(-offset.width - 30) / 70 : 0)
                     
                     Spacer()
@@ -276,7 +299,7 @@ struct ConsentCard: View {
                     // Accept indicator
                     Image(systemName: "checkmark.circle.fill")
                         .font(.system(size: 50))
-                        .foregroundStyle(.statusSafe)
+                        .foregroundStyle(Color.statusSafe)
                         .opacity(offset.width > 30 ? Double(offset.width - 30) / 70 : 0)
                 }
                 .padding(.horizontal, DesignTokens.spacingLarge)
@@ -349,7 +372,7 @@ struct BoundaryReviewView: View {
                             Text(card.category)
                             Spacer()
                             Image(systemName: "checkmark.circle.fill")
-                                .foregroundStyle(.statusSafe)
+                                .foregroundStyle(Color.statusSafe)
                         }
                     }
                 }
@@ -362,7 +385,7 @@ struct BoundaryReviewView: View {
                             Text(card.category)
                             Spacer()
                             Image(systemName: "xmark.circle.fill")
-                                .foregroundStyle(.statusDanger)
+                                .foregroundStyle(Color.statusDanger)
                         }
                     }
                 }

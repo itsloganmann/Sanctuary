@@ -11,6 +11,7 @@ import AuthenticationServices
 struct AuthenticationView: View {
     @Environment(DependencyContainer.self) private var dependencies
     @State private var showingPhoneAuth = false
+    @State private var showingEmailAuth = false
     @State private var isLoading = false
     @State private var errorMessage: String?
     
@@ -27,8 +28,8 @@ struct AuthenticationView: View {
                 VStack(spacing: DesignTokens.spacingMedium) {
                     Image(systemName: "shield.fill")
                         .font(.system(size: 80))
-                        .foregroundStyle(.safetyOrange)
-                        .shadow(color: .safetyOrange.opacity(0.5), radius: 20)
+                        .foregroundStyle(Color.safetyOrange)
+                        .shadow(color: Color.safetyOrange.opacity(0.5), radius: 20)
                     
                     Text("Sanctuary")
                         .font(.displayLarge)
@@ -36,7 +37,7 @@ struct AuthenticationView: View {
                     
                     Text("Your safety, your boundaries")
                         .font(.bodyLarge)
-                        .foregroundStyle(.textSecondary)
+                        .foregroundStyle(Color.textSecondary)
                 }
                 
                 Spacer()
@@ -45,10 +46,10 @@ struct AuthenticationView: View {
                 if let error = errorMessage {
                     HStack {
                         Image(systemName: "exclamationmark.triangle.fill")
-                            .foregroundStyle(.statusWarning)
+                            .foregroundStyle(Color.statusWarning)
                         Text(error)
                             .font(.bodySmall)
-                            .foregroundStyle(.textSecondary)
+                            .foregroundStyle(Color.textSecondary)
                     }
                     .padding()
                     .background(Color.statusWarning.opacity(0.1))
@@ -57,30 +58,7 @@ struct AuthenticationView: View {
                 
                 // Auth buttons
                 VStack(spacing: DesignTokens.spacingMedium) {
-                    // Sign in with Apple
-                    SignInWithAppleButton { request in
-                        request.requestedScopes = [.email, .fullName]
-                    } onCompletion: { result in
-                        handleAppleSignIn(result: result)
-                    }
-                    .signInWithAppleButtonStyle(.white)
-                    .frame(height: DesignTokens.buttonHeightLarge)
-                    .clipShape(RoundedRectangle(cornerRadius: DesignTokens.cornerRadiusMedium))
-                    
-                    // Divider
-                    HStack {
-                        Rectangle()
-                            .fill(Color.borderSubtle)
-                            .frame(height: 1)
-                        Text("or")
-                            .font(.labelMedium)
-                            .foregroundStyle(.textTertiary)
-                        Rectangle()
-                            .fill(Color.borderSubtle)
-                            .frame(height: 1)
-                    }
-                    
-                    // Phone auth
+                    // Phone auth - Primary option (no Apple Dev account needed)
                     Button {
                         showingPhoneAuth = true
                     } label: {
@@ -89,14 +67,42 @@ struct AuthenticationView: View {
                             Text("Continue with Phone")
                         }
                     }
+                    .buttonStyle(PrimaryButtonStyle())
+                    
+                    // Email auth - Secondary option (no Apple Dev account needed)
+                    Button {
+                        showingEmailAuth = true
+                    } label: {
+                        HStack {
+                            Image(systemName: "envelope.fill")
+                            Text("Continue with Email")
+                        }
+                    }
                     .buttonStyle(SecondaryButtonStyle())
+                    
+                    #if DEBUG
+                    // Debug bypass for testing
+                    Button {
+                        Task {
+                            await dependencies.authManager.debugSignIn()
+                        }
+                    } label: {
+                        HStack {
+                            Image(systemName: "wrench.and.screwdriver")
+                            Text("Skip Auth (Debug)")
+                        }
+                        .font(.labelMedium)
+                        .foregroundStyle(Color.textTertiary)
+                    }
+                    .padding(.top, DesignTokens.spacingSmall)
+                    #endif
                 }
                 .padding(.horizontal, DesignTokens.spacingLarge)
                 
                 // Terms
                 Text("By continuing, you agree to our Terms of Service and Privacy Policy")
                     .font(.labelSmall)
-                    .foregroundStyle(.textTertiary)
+                    .foregroundStyle(Color.textTertiary)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, DesignTokens.spacingLarge)
                     .padding(.bottom, DesignTokens.spacingLarge)
@@ -115,22 +121,205 @@ struct AuthenticationView: View {
         .sheet(isPresented: $showingPhoneAuth) {
             PhoneAuthView()
         }
+        .sheet(isPresented: $showingEmailAuth) {
+            EmailAuthView()
+        }
+    }
+}
+
+// MARK: - Email Auth View
+
+struct EmailAuthView: View {
+    @Environment(\.dismiss) private var dismiss
+    @Environment(DependencyContainer.self) private var dependencies
+    
+    @State private var email = ""
+    @State private var password = ""
+    @State private var confirmPassword = ""
+    @State private var isSignUp = false
+    @State private var isLoading = false
+    @State private var errorMessage: String?
+    @State private var successMessage: String?
+    
+    var body: some View {
+        NavigationStack {
+            ZStack {
+                Color.sanctuaryBlack
+                    .ignoresSafeArea()
+                
+                VStack(spacing: DesignTokens.spacingLarge) {
+                    // Header
+                    VStack(spacing: DesignTokens.spacingSmall) {
+                        Image(systemName: "envelope.fill")
+                            .font(.system(size: 50))
+                            .foregroundStyle(Color.safetyOrange)
+                        
+                        Text(isSignUp ? "Create Account" : "Sign In")
+                            .font(.displaySmall)
+                            .foregroundStyle(.white)
+                        
+                        Text(isSignUp ? "Enter your email and create a password" : "Enter your email and password")
+                            .font(.bodyMedium)
+                            .foregroundStyle(Color.textSecondary)
+                            .multilineTextAlignment(.center)
+                    }
+                    .padding(.top, DesignTokens.spacingXLarge)
+                    
+                    Spacer()
+                    
+                    // Input fields
+                    VStack(spacing: DesignTokens.spacingMedium) {
+                        // Email
+                        TextField("Email", text: $email)
+                            .font(.bodyLarge)
+                            .foregroundStyle(.white)
+                            .keyboardType(.emailAddress)
+                            .textContentType(.emailAddress)
+                            .autocapitalization(.none)
+                            .padding()
+                            .background(Color.cardBackground)
+                            .clipShape(RoundedRectangle(cornerRadius: DesignTokens.cornerRadiusMedium))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: DesignTokens.cornerRadiusMedium)
+                                    .stroke(Color.borderSubtle, lineWidth: 1)
+                            )
+                        
+                        // Password
+                        SecureField("Password", text: $password)
+                            .font(.bodyLarge)
+                            .foregroundStyle(.white)
+                            .textContentType(isSignUp ? .newPassword : .password)
+                            .padding()
+                            .background(Color.cardBackground)
+                            .clipShape(RoundedRectangle(cornerRadius: DesignTokens.cornerRadiusMedium))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: DesignTokens.cornerRadiusMedium)
+                                    .stroke(Color.borderSubtle, lineWidth: 1)
+                            )
+                        
+                        // Confirm password (sign up only)
+                        if isSignUp {
+                            SecureField("Confirm Password", text: $confirmPassword)
+                                .font(.bodyLarge)
+                                .foregroundStyle(.white)
+                                .textContentType(.newPassword)
+                                .padding()
+                                .background(Color.cardBackground)
+                                .clipShape(RoundedRectangle(cornerRadius: DesignTokens.cornerRadiusMedium))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: DesignTokens.cornerRadiusMedium)
+                                        .stroke(Color.borderSubtle, lineWidth: 1)
+                                )
+                        }
+                    }
+                    .padding(.horizontal)
+                    
+                    // Error/Success messages
+                    if let error = errorMessage {
+                        Text(error)
+                            .font(.bodySmall)
+                            .foregroundStyle(Color.statusDanger)
+                    }
+                    
+                    if let success = successMessage {
+                        Text(success)
+                            .font(.bodySmall)
+                            .foregroundStyle(Color.statusSafe)
+                    }
+                    
+                    // Toggle sign up / sign in
+                    Button {
+                        withAnimation {
+                            isSignUp.toggle()
+                            errorMessage = nil
+                            successMessage = nil
+                        }
+                    } label: {
+                        Text(isSignUp ? "Already have an account? Sign In" : "Don't have an account? Sign Up")
+                            .font(.bodySmall)
+                            .foregroundStyle(Color.safetyOrange)
+                    }
+                    
+                    Spacer()
+                    
+                    // Submit button
+                    Button {
+                        if isSignUp {
+                            signUp()
+                        } else {
+                            signIn()
+                        }
+                    } label: {
+                        if isLoading {
+                            ProgressView()
+                                .tint(.white)
+                        } else {
+                            Text(isSignUp ? "Create Account" : "Sign In")
+                        }
+                    }
+                    .buttonStyle(PrimaryButtonStyle())
+                    .disabled(isLoading || !isFormValid)
+                    .padding(.horizontal)
+                    .padding(.bottom, DesignTokens.spacingLarge)
+                }
+            }
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button {
+                        dismiss()
+                    } label: {
+                        Image(systemName: "xmark")
+                            .foregroundStyle(Color.textSecondary)
+                    }
+                }
+            }
+        }
     }
     
-    private func handleAppleSignIn(result: Result<ASAuthorization, Error>) {
-        switch result {
-        case .success:
-            isLoading = true
-            Task {
-                do {
-                    try await dependencies.authManager.signInWithApple()
-                } catch {
-                    errorMessage = error.localizedDescription
-                }
-                isLoading = false
+    private var isFormValid: Bool {
+        let emailValid = email.contains("@") && email.contains(".")
+        let passwordValid = password.count >= 6
+        
+        if isSignUp {
+            return emailValid && passwordValid && password == confirmPassword
+        }
+        return emailValid && passwordValid
+    }
+    
+    private func signIn() {
+        isLoading = true
+        errorMessage = nil
+        
+        Task {
+            do {
+                try await dependencies.authManager.signInWithEmail(email: email, password: password)
+                dismiss()
+            } catch {
+                errorMessage = error.localizedDescription
             }
-        case .failure(let error):
-            errorMessage = error.localizedDescription
+            isLoading = false
+        }
+    }
+    
+    private func signUp() {
+        guard password == confirmPassword else {
+            errorMessage = "Passwords don't match"
+            return
+        }
+        
+        isLoading = true
+        errorMessage = nil
+        
+        Task {
+            do {
+                try await dependencies.authManager.signUpWithEmail(email: email, password: password)
+                successMessage = "Check your email to confirm your account!"
+                // Don't dismiss - user needs to confirm email first
+            } catch {
+                errorMessage = error.localizedDescription
+            }
+            isLoading = false
         }
     }
 }
@@ -159,7 +348,7 @@ struct PhoneAuthView: View {
                     VStack(spacing: DesignTokens.spacingSmall) {
                         Image(systemName: isCodeSent ? "key.fill" : "phone.fill")
                             .font(.system(size: 50))
-                            .foregroundStyle(.safetyOrange)
+                            .foregroundStyle(Color.safetyOrange)
                         
                         Text(isCodeSent ? "Enter Code" : "Phone Number")
                             .font(.displaySmall)
@@ -169,7 +358,7 @@ struct PhoneAuthView: View {
                              ? "We sent a code to \(phoneNumber)"
                              : "We'll send you a verification code")
                             .font(.bodyMedium)
-                            .foregroundStyle(.textSecondary)
+                            .foregroundStyle(Color.textSecondary)
                             .multilineTextAlignment(.center)
                     }
                     .padding(.top, DesignTokens.spacingXLarge)
@@ -185,20 +374,20 @@ struct PhoneAuthView: View {
                         if countdown > 0 {
                             Text("Resend in \(countdown)s")
                                 .font(.bodySmall)
-                                .foregroundStyle(.textTertiary)
+                                .foregroundStyle(Color.textTertiary)
                         } else {
                             Button("Resend Code") {
                                 sendOTP()
                             }
                             .font(.bodySmall)
-                            .foregroundStyle(.safetyOrange)
+                            .foregroundStyle(Color.safetyOrange)
                         }
                     } else {
                         // Phone number input
                         HStack {
                             Text("+1")
                                 .font(.headlineMedium)
-                                .foregroundStyle(.textSecondary)
+                                .foregroundStyle(Color.textSecondary)
                                 .padding(.leading)
                             
                             TextField("(555) 123-4567", text: $phoneNumber)
@@ -221,7 +410,7 @@ struct PhoneAuthView: View {
                     if let error = errorMessage {
                         Text(error)
                             .font(.bodySmall)
-                            .foregroundStyle(.statusDanger)
+                            .foregroundStyle(Color.statusDanger)
                     }
                     
                     Spacer()
@@ -259,7 +448,7 @@ struct PhoneAuthView: View {
                         }
                     } label: {
                         Image(systemName: isCodeSent ? "chevron.left" : "xmark")
-                            .foregroundStyle(.textSecondary)
+                            .foregroundStyle(Color.textSecondary)
                     }
                 }
             }

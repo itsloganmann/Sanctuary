@@ -11,11 +11,11 @@ import Foundation
 enum SupabaseConfig {
     /// Your Supabase project URL
     /// TODO: Replace with your actual Supabase URL
-    static let projectURL = URL(string: "https://your-project.supabase.co")!
+    static let projectURL = URL(string: "https://kpuichvxsgsisnnzexib.supabase.co")!
     
     /// Your Supabase anon/public key
     /// TODO: Replace with your actual anon key
-    static let anonKey = "your-anon-key"
+    static let anonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtwdWljaHZ4c2dzaXNubnpleGliIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU5OTMyMDksImV4cCI6MjA4MTU2OTIwOX0.4fEEyJbX571Wv0T09vzCV-6_YEzfEeTQ6MyOVAzJJo0"
     
     /// App URL scheme for deep linking
     static let redirectURL = URL(string: "sanctuary://auth-callback")!
@@ -99,7 +99,7 @@ actor SupabaseClientWrapper {
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request = addHeaders(to: request)
-        request.setValue(returning, forHTTPHeaderField: "Prefer")
+    request.setValue(returning, forHTTPHeaderField: "Prefer")
         request.httpBody = try JSONEncoder.supabase.encode(values)
         
         let (data, response) = try await URLSession.shared.data(for: request)

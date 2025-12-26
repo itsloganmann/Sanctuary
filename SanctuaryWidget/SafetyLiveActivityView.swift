@@ -20,7 +20,7 @@ struct SafetyLiveActivityView: Widget {
                 DynamicIslandExpandedRegion(.leading) {
                     HStack {
                         statusIcon(for: context.state.status)
-                            .font(.title2)
+                            .font(.system(.title2, design: .rounded))
                         
                         Text(context.state.status.displayText)
                             .font(.system(.headline, design: .rounded))
@@ -32,7 +32,7 @@ struct SafetyLiveActivityView: Widget {
                     if context.state.status == .monitoring || context.state.status == .panic {
                         Button(intent: CheckInIntent()) {
                             Image(systemName: "checkmark.circle.fill")
-                                .font(.title2)
+                                .font(.system(.title2, design: .rounded))
                                 .foregroundStyle(.green)
                         }
                         .buttonStyle(.plain)
@@ -111,7 +111,7 @@ struct LockScreenLiveActivityView: View {
             VStack(alignment: .leading, spacing: 4) {
                 HStack(spacing: 8) {
                     Image(systemName: context.state.status.icon)
-                        .font(.title2)
+                        .font(.system(.title2, design: .rounded))
                         .foregroundStyle(statusColor)
                     
                     Text(context.state.status.displayText)
@@ -200,8 +200,3 @@ struct LockScreenLiveActivityView: View {
     }
 }
 
-// MARK: - Color Extension (duplicated for widget target)
-
-extension Color {
-    static let safetyOrange = Color(red: 1.0, green: 0.373, blue: 0.0)
-}

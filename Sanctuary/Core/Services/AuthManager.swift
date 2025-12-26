@@ -96,6 +96,34 @@ final class AuthManager: NSObject {
         authState = .unauthenticated
     }
     
+    #if DEBUG
+    /// Debug sign-in for testing without real authentication
+    func debugSignIn() async {
+        let debugUserId = UUID()
+        let debugProfile = Profile(
+            id: debugUserId,
+            phoneNumber: "+1234567890",
+            displayName: "Test User",
+            avatarUrl: nil,
+            emergencyMessage: "Please help! This is an emergency.",
+            isMonitoringEnabled: false,
+            checkInIntervalMinutes: 30,
+            createdAt: Date(),
+            updatedAt: Date()
+        )
+        
+        currentUser = User(
+            id: debugUserId,
+            email: "test@sanctuary.app",
+            phone: "+1234567890",
+            createdAt: Date(),
+            profile: debugProfile
+        )
+        authState = .authenticated(currentUser!)
+        authStateContinuation?.yield(currentUser)
+    }
+    #endif
+    
     /// Fetch current user and their profile
     private func fetchCurrentUser(userId: UUID) async {
         do {
@@ -216,6 +244,85 @@ final class AuthManager: NSObject {
         let sessionResponse = try JSONDecoder.supabase.decode(AuthSessionResponse.self, from: data)
         
         // Store session
+        await handleAuthSession(sessionResponse)
+    }
+    
+    // MARK: - Email Authentication
+    
+    /// Sign up with email and password
+    func signUpWithEmail(email: String, password: String) async throws {
+        authState = .authenticating
+        
+        let url = SupabaseConfig.projectURL.appendingPathComponent("auth/v1/signup")
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue(SupabaseConfig.anonKey, forHTTPHeaderField: "apikey")
+        
+        let body: [String: Any] = [
+            "email": email,
+            "password": password
+        ]
+        request.httpBody = try JSONSerialization.data(withJSONObject: body)
+        
+        let (data, response) = try await URLSession.shared.data(for: request)
+        
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw SupabaseError.authError("Invalid response")
+        }
+        
+        if !(200...299).contains(httpResponse.statusCode) {
+            // Parse error message
+            if let errorResponse = try? JSONDecoder().decode(AuthErrorResponse.self, from: data) {
+                throw SupabaseError.authError(errorResponse.message ?? errorResponse.error ?? "Sign up failed")
+            }
+            throw SupabaseError.authError("Sign up failed")
+        }
+        
+        // For email signup, user needs to confirm email before session is created
+        // If email confirmation is disabled, session will be returned
+        if let sessionResponse = try? JSONDecoder.supabase.decode(AuthSessionResponse.self, from: data) {
+            await handleAuthSession(sessionResponse)
+        } else {
+            // Email confirmation required - stay unauthenticated
+            authState = .unauthenticated
+        }
+    }
+    
+    /// Sign in with email and password
+    func signInWithEmail(email: String, password: String) async throws {
+        authState = .authenticating
+        
+        let url = SupabaseConfig.projectURL.appendingPathComponent("auth/v1/token")
+        var urlComponents = URLComponents(url: url, resolvingAgainstBaseURL: false)!
+        urlComponents.queryItems = [URLQueryItem(name: "grant_type", value: "password")]
+        
+        var request = URLRequest(url: urlComponents.url!)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue(SupabaseConfig.anonKey, forHTTPHeaderField: "apikey")
+        
+        let body: [String: Any] = [
+            "email": email,
+            "password": password
+        ]
+        request.httpBody = try JSONSerialization.data(withJSONObject: body)
+        
+        let (data, response) = try await URLSession.shared.data(for: request)
+        
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw SupabaseError.authError("Invalid response")
+        }
+        
+        if !(200...299).contains(httpResponse.statusCode) {
+            if let errorResponse = try? JSONDecoder().decode(AuthErrorResponse.self, from: data) {
+                throw SupabaseError.authError(errorResponse.message ?? errorResponse.error ?? "Sign in failed")
+            }
+            throw SupabaseError.authError("Invalid email or password")
+        }
+        
+        let sessionResponse = try JSONDecoder.supabase.decode(AuthSessionResponse.self, from: data)
         await handleAuthSession(sessionResponse)
     }
     
@@ -359,4 +466,16 @@ struct StoredSession: Codable {
     let refreshToken: String
     let expiresAt: Date
     let userId: UUID
+}
+
+struct AuthErrorResponse: Codable {
+    let error: String?
+    let message: String?
+    let errorDescription: String?
+    
+    enum CodingKeys: String, CodingKey {
+        case error
+        case message = "msg"
+        case errorDescription = "error_description"
+    }
 }

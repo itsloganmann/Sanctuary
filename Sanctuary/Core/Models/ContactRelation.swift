@@ -77,17 +77,45 @@ struct ContactRelation: Codable, Identifiable, Sendable, Equatable {
     }
 }
 
-/// Extended contact info with profile details
+/// Extended contact info with profile details (matches Supabase join response)
 struct TrustedContact: Codable, Identifiable, Sendable {
-    let id: UUID
-    let displayName: String
-    let phoneNumber: String?
+    let trustedContactId: UUID
     let relationType: RelationType
-    
+    let profiles: ProfileJoined?
+
     enum CodingKeys: String, CodingKey {
-        case id = "contact_id"
-        case displayName = "display_name"
-        case phoneNumber = "phone_number"
+        case trustedContactId = "trusted_contact_id"
         case relationType = "relation_type"
+        case profiles
+    }
+
+    // Computed properties for SwiftUI compatibility
+    var id: UUID { trustedContactId }
+    var displayName: String { profiles?.displayName ?? "" }
+    var phoneNumber: String? { profiles?.phoneNumber }
+}
+
+// Profile struct for joined response (all fields optional)
+struct ProfileJoined: Codable, Identifiable, Sendable {
+    let id: UUID?
+    let phoneNumber: String?
+    let displayName: String?
+    let avatarUrl: String?
+    let emergencyMessage: String?
+    let isMonitoringEnabled: Bool?
+    let checkInIntervalMinutes: Int?
+    let createdAt: Date?
+    let updatedAt: Date?
+
+    enum CodingKeys: String, CodingKey {
+        case id
+        case phoneNumber = "phone_number"
+        case displayName = "display_name"
+        case avatarUrl = "avatar_url"
+        case emergencyMessage = "emergency_message"
+        case isMonitoringEnabled = "is_monitoring_enabled"
+        case checkInIntervalMinutes = "check_in_interval_minutes"
+        case createdAt = "created_at"
+        case updatedAt = "updated_at"
     }
 }

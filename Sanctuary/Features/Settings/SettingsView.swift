@@ -30,7 +30,7 @@ struct SettingsView: View {
                                 .overlay(
                                     Text(profile.displayName.prefix(1).uppercased())
                                         .font(.headlineLarge)
-                                        .foregroundStyle(.safetyOrange)
+                                        .foregroundStyle(Color.safetyOrange)
                                 )
                             
                             VStack(alignment: .leading, spacing: 4) {
@@ -40,14 +40,14 @@ struct SettingsView: View {
                                 if let phone = profile.phoneNumber {
                                     Text(phone)
                                         .font(.bodySmall)
-                                        .foregroundStyle(.textSecondary)
+                                        .foregroundStyle(Color.textSecondary)
                                 }
                             }
                             
                             Spacer()
                             
                             Image(systemName: "chevron.right")
-                                .foregroundStyle(.textTertiary)
+                                .foregroundStyle(Color.textTertiary)
                         }
                         .padding(.vertical, DesignTokens.spacingSmall)
                     }
@@ -61,7 +61,7 @@ struct SettingsView: View {
                     VStack(alignment: .leading, spacing: DesignTokens.spacingSmall) {
                         Text("Emergency Message")
                             .font(.labelMedium)
-                            .foregroundStyle(.textSecondary)
+                            .foregroundStyle(Color.textSecondary)
                         
                         TextField("Message sent to contacts", text: $emergencyMessage)
                             .textFieldStyle(.roundedBorder)
@@ -74,14 +74,14 @@ struct SettingsView: View {
                             Text("Check-In Interval")
                             Spacer()
                             Text("\(checkInInterval) min")
-                                .foregroundStyle(.safetyOrange)
+                                .foregroundStyle(Color.safetyOrange)
                         }
                         
                         Slider(value: Binding(
                             get: { Double(checkInInterval) },
                             set: { checkInInterval = Int($0) }
                         ), in: 5...120, step: 5)
-                        .tint(.safetyOrange)
+                        .tint(Color.safetyOrange)
                     }
                     .padding(.vertical, DesignTokens.spacingSmall)
                     
@@ -91,10 +91,10 @@ struct SettingsView: View {
                             Text("Stealth Mode")
                             Text("Dims screen while monitoring")
                                 .font(.labelSmall)
-                                .foregroundStyle(.textSecondary)
+                                .foregroundStyle(Color.textSecondary)
                         }
                     }
-                    .tint(.safetyOrange)
+                    .tint(Color.safetyOrange)
                 } header: {
                     Text("Safety Settings")
                 }
@@ -134,7 +134,7 @@ struct SettingsView: View {
                         Text("Version")
                         Spacer()
                         Text("1.0.0")
-                            .foregroundStyle(.textSecondary)
+                            .foregroundStyle(Color.textSecondary)
                     }
                     
                     Link(destination: URL(string: "https://sanctuary.app/privacy")!) {
@@ -142,7 +142,7 @@ struct SettingsView: View {
                             Text("Privacy Policy")
                             Spacer()
                             Image(systemName: "arrow.up.right")
-                                .foregroundStyle(.textTertiary)
+                                .foregroundStyle(Color.textTertiary)
                         }
                     }
                     
@@ -151,7 +151,7 @@ struct SettingsView: View {
                             Text("Terms of Service")
                             Spacer()
                             Image(systemName: "arrow.up.right")
-                                .foregroundStyle(.textTertiary)
+                                .foregroundStyle(Color.textTertiary)
                         }
                     }
                 } header: {
@@ -181,7 +181,7 @@ struct SettingsView: View {
                     Button("Done") {
                         dismiss()
                     }
-                    .foregroundStyle(.safetyOrange)
+                    .foregroundStyle(Color.safetyOrange)
                 }
             }
             .confirmationDialog("Sign Out", isPresented: $showingSignOutConfirmation) {
@@ -223,14 +223,14 @@ struct PermissionRow: View {
         Button(action: action) {
             HStack(spacing: DesignTokens.spacingMedium) {
                 Image(systemName: icon)
-                    .foregroundStyle(isGranted ? .statusSafe : .statusWarning)
+                    .foregroundStyle(isGranted ? Color.statusSafe : Color.statusWarning)
                     .frame(width: 24)
                 
                 VStack(alignment: .leading, spacing: 2) {
                     Text(title)
                     Text(status)
                         .font(.labelSmall)
-                        .foregroundStyle(.textSecondary)
+                        .foregroundStyle(Color.textSecondary)
                         .lineLimit(1)
                 }
                 
@@ -239,7 +239,7 @@ struct PermissionRow: View {
                 if !isGranted {
                     Text("Fix")
                         .font(.labelMedium)
-                        .foregroundStyle(.safetyOrange)
+                        .foregroundStyle(Color.safetyOrange)
                 }
             }
         }

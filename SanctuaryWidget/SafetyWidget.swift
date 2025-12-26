@@ -267,7 +267,6 @@ struct PulsingRadar: View {
 
 // MARK: - Widget Configuration
 
-@main
 struct SanctuaryWidget: Widget {
     let kind: String = "SanctuaryWidget"
     
@@ -285,20 +284,6 @@ struct SanctuaryWidget: Widget {
             .accessoryRectangular
         ])
     }
-}
-
-// MARK: - Shared UserDefaults
-
-extension UserDefaults {
-    static var shared: UserDefaults {
-        UserDefaults(suiteName: "group.com.sanctuary.app") ?? .standard
-    }
-}
-
-// MARK: - Color Extension
-
-extension Color {
-    static let safetyOrange = Color(red: 1.0, green: 0.373, blue: 0.0) // #FF5F00
 }
 
 // MARK: - Preview

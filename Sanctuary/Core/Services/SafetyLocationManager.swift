@@ -117,6 +117,35 @@ final class SafetyLocationManager: NSObject {
     
     /// Continuation for async location stream
     private var locationContinuation: AsyncStream<CLLocation>.Continuation?
+
+    // MARK: - Alert Sending
+
+    /// Send alert to trusted contacts via Supabase Edge Function
+    func sendAlertToContacts(location: CLLocation, message: String) async {
+        guard let userId = DependencyContainer.shared.authManager.currentUser?.id else { return }
+        guard let url = URL(string: "https://kpuichvxsgsisnnzexib.functions.supabase.co/send_alert") else { return }
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("Bearer \(SupabaseConfig.anonKey)", forHTTPHeaderField: "Authorization")
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        let body: [String: Any] = [
+            "user_id": userId.uuidString,
+            "latitude": location.coordinate.latitude,
+            "longitude": location.coordinate.longitude,
+            "message": message
+        ]
+        do {
+            request.httpBody = try JSONSerialization.data(withJSONObject: body)
+            let (_, response) = try await URLSession.shared.data(for: request)
+            guard let httpResponse = response as? HTTPURLResponse, (200...299).contains(httpResponse.statusCode) else {
+                print("Failed to send alert to contacts")
+                return
+            }
+            print("Alert sent to contacts!")
+        } catch {
+            print("Error sending alert: \(error)")
+        }
+    }
     
     // MARK: - Initialization
     
@@ -189,17 +218,34 @@ final class SafetyLocationManager: NSObject {
         locationManager.activityType = MonitoringLevel.panic.activityType
         
         // CRITICAL: Enable background updates BEFORE going to background
-        locationManager.allowsBackgroundLocationUpdates = true
+        // Check if the app has "location" in UIBackgroundModes
+        let hasBackgroundLocation: Bool = {
+            guard let modes = Bundle.main.object(forInfoDictionaryKey: "UIBackgroundModes") as? [String] else {
+                return false
+            }
+            return modes.contains("location")
+        }()
         
-        // Start background activity session (iOS 17+)
-        // This is the key to keeping the app alive in background
-        backgroundSession = CLBackgroundActivitySession()
+        if hasBackgroundLocation {
+            locationManager.allowsBackgroundLocationUpdates = true
+            // Start background activity session (iOS 17+)
+            // This is the key to keeping the app alive in background
+            backgroundSession = CLBackgroundActivitySession()
+        } else {
+            // Log warning - background location not configured
+            print("⚠️ WARNING: UIBackgroundModes does not contain 'location'. Background tracking disabled.")
+        }
         
         // Start location updates using modern async stream (iOS 17+)
         await startLocationStream()
         
         // Also start legacy updates as fallback
         locationManager.startUpdatingLocation()
+
+        // Send alert to trusted contacts
+        if let location = currentLocation {
+            await sendAlertToContacts(location: location, message: "I need help. This is an emergency.")
+        }
     }
     
     /// Stop panic mode and release resources

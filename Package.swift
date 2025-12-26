@@ -1,10 +1,10 @@
-// swift-tools-version: 5.9
+// swift-tools-version: 6.0
 import PackageDescription
 
 let package = Package(
     name: "Sanctuary",
     platforms: [
-        .iOS(.v18)
+        .iOS(.v17) // SPM uses .v17, actual deployment target set in project.yml
     ],
     products: [
         .library(

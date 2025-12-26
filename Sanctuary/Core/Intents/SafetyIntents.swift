@@ -42,11 +42,11 @@ import WidgetKit
 /// establish the background location session.
 struct ToggleSafetyMonitoringIntent: LiveActivityIntent {
     
-    static var title: LocalizedStringResource = "Toggle Safety Monitoring"
-    static var description = IntentDescription("Start or stop safety monitoring")
+    static let title: LocalizedStringResource = "Toggle Safety Monitoring"
+    static let description: IntentDescription = "Start or stop safety monitoring"
     
     // CRITICAL: This ensures the app gets foreground time to start background location
-    static var openAppWhenRun: Bool = true
+    static var openAppWhenRun: Bool { true }
     
     @MainActor
     func perform() async throws -> some IntentResult {
@@ -57,8 +57,9 @@ struct ToggleSafetyMonitoringIntent: LiveActivityIntent {
             await dependencies.deactivatePanicMode()
             await stopLiveActivity()
         } else {
-            // Start monitoring
+            // Start monitoring (panic mode)
             try await dependencies.activatePanicMode()
+            // This will trigger SafetyLocationManager.startPanicMode(), which sends alert
             await startLiveActivity()
         }
         
@@ -130,10 +131,10 @@ struct ToggleSafetyMonitoringIntent: LiveActivityIntent {
 /// Intent for the panic button - escalates to full emergency mode
 struct PanicButtonIntent: LiveActivityIntent {
     
-    static var title: LocalizedStringResource = "Panic Alert"
-    static var description = IntentDescription("Trigger emergency panic alert")
+    static let title: LocalizedStringResource = "Panic Alert"
+    static let description: IntentDescription = "Trigger emergency panic alert"
     
-    static var openAppWhenRun: Bool = true
+    static var openAppWhenRun: Bool { true }
     
     @MainActor
     func perform() async throws -> some IntentResult {
@@ -145,6 +146,7 @@ struct PanicButtonIntent: LiveActivityIntent {
         // Activate panic mode if not already active
         if !dependencies.isPanicModeActive {
             try await dependencies.activatePanicMode()
+            // This will trigger SafetyLocationManager.startPanicMode(), which sends alert
         }
         
         // Update Live Activity to panic state
@@ -158,7 +160,7 @@ struct PanicButtonIntent: LiveActivityIntent {
                 batteryLevel: dependencies.safetyLocationManager.getBatteryLevel()
             )
             
-            try? await dependencies.safetyAlertRepository.create(alert)
+            _ = try? await dependencies.safetyAlertRepository.create(alert)
         }
         
         return .result()
@@ -187,11 +189,11 @@ struct PanicButtonIntent: LiveActivityIntent {
 /// Intent for check-in button - confirms user is safe
 struct CheckInIntent: LiveActivityIntent {
     
-    static var title: LocalizedStringResource = "Check In"
-    static var description = IntentDescription("Confirm you are safe")
+    static let title: LocalizedStringResource = "Check In"
+    static let description: IntentDescription = "Confirm you are safe"
     
     // Check-in can run without opening app fully
-    static var openAppWhenRun: Bool = false
+    static var openAppWhenRun: Bool { false }
     
     @MainActor
     func perform() async throws -> some IntentResult {
@@ -232,10 +234,10 @@ struct CheckInIntent: LiveActivityIntent {
 /// Intent to stop all monitoring and resolve alerts
 struct StopMonitoringIntent: LiveActivityIntent {
     
-    static var title: LocalizedStringResource = "Stop Monitoring"
-    static var description = IntentDescription("Stop safety monitoring and resolve any alerts")
+    static let title: LocalizedStringResource = "Stop Monitoring"
+    static let description: IntentDescription = "Stop safety monitoring and resolve any alerts"
     
-    static var openAppWhenRun: Bool = true
+    static var openAppWhenRun: Bool { true }
     
     @MainActor
     func perform() async throws -> some IntentResult {

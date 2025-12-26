@@ -6,7 +6,7 @@
 //
 
 import SwiftUI
-import AVFoundation
+@preconcurrency import AVFoundation
 
 struct QRScannerView: View {
     @Environment(\.dismiss) private var dismiss
@@ -85,7 +85,7 @@ struct QRScannerView: View {
                             
                             Text("Position the QR code within the frame")
                                 .font(.bodySmall)
-                                .foregroundStyle(.textSecondary)
+                                .foregroundStyle(Color.textSecondary)
                         }
                     }
                     .padding()
@@ -158,6 +158,7 @@ struct QRScannerRepresentable: UIViewControllerRepresentable {
         Coordinator(self)
     }
     
+    @MainActor
     class Coordinator: NSObject, QRScannerDelegate {
         let parent: QRScannerRepresentable
         
@@ -174,15 +175,18 @@ struct QRScannerRepresentable: UIViewControllerRepresentable {
 
 // MARK: - QR Scanner View Controller
 
+@MainActor
 protocol QRScannerDelegate: AnyObject {
     func didScanCode(_ code: String)
 }
 
-class QRScannerViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate {
+@MainActor
+class QRScannerViewController: UIViewController {
     weak var delegate: QRScannerDelegate?
     
     private var captureSession: AVCaptureSession?
     private var previewLayer: AVCaptureVideoPreviewLayer?
+    private var metadataDelegate: MetadataOutputDelegate?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -212,7 +216,14 @@ class QRScannerViewController: UIViewController, AVCaptureMetadataOutputObjectsD
             if captureSession.canAddOutput(metadataOutput) {
                 captureSession.addOutput(metadataOutput)
                 
-                metadataOutput.setMetadataObjectsDelegate(self, queue: .main)
+                // Use a separate delegate class to avoid actor isolation issues
+                let delegate = MetadataOutputDelegate { [weak self] code in
+                    Task { @MainActor in
+                        self?.handleScannedCode(code)
+                    }
+                }
+                self.metadataDelegate = delegate
+                metadataOutput.setMetadataObjectsDelegate(delegate, queue: .main)
                 metadataOutput.metadataObjectTypes = [.qr]
             }
             
@@ -222,12 +233,38 @@ class QRScannerViewController: UIViewController, AVCaptureMetadataOutputObjectsD
             view.layer.addSublayer(previewLayer)
             self.previewLayer = previewLayer
             
-            DispatchQueue.global(qos: .userInitiated).async {
-                captureSession.startRunning()
+            let session = captureSession
+            DispatchQueue.global(qos: .userInitiated).async { [session] in
+                session.startRunning()
             }
         } catch {
             print("Failed to setup camera: \(error)")
         }
+    }
+    
+    private func handleScannedCode(_ code: String) {
+        // Haptic feedback
+        let generator = UIImpactFeedbackGenerator(style: .medium)
+        generator.impactOccurred()
+        
+        captureSession?.stopRunning()
+        delegate?.didScanCode(code)
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        captureSession?.stopRunning()
+    }
+}
+
+// MARK: - Metadata Output Delegate (non-isolated for AVFoundation callback)
+
+private class MetadataOutputDelegate: NSObject, AVCaptureMetadataOutputObjectsDelegate {
+    private let onCodeScanned: (String) -> Void
+    
+    init(onCodeScanned: @escaping (String) -> Void) {
+        self.onCodeScanned = onCodeScanned
+        super.init()
     }
     
     func metadataOutput(_ output: AVCaptureMetadataOutput, didOutput metadataObjects: [AVMetadataObject], from connection: AVCaptureConnection) {
@@ -235,17 +272,7 @@ class QRScannerViewController: UIViewController, AVCaptureMetadataOutputObjectsD
               let readableObject = metadataObject as? AVMetadataMachineReadableCodeObject,
               let stringValue = readableObject.stringValue else { return }
         
-        // Haptic feedback
-        let generator = UIImpactFeedbackGenerator(style: .medium)
-        generator.impactOccurred()
-        
-        captureSession?.stopRunning()
-        delegate?.didScanCode(stringValue)
-    }
-    
-    override func viewWillDisappear(_ animated: Bool) {
-        super.viewWillDisappear(animated)
-        captureSession?.stopRunning()
+        onCodeScanned(stringValue)
     }
 }
 
@@ -277,7 +304,7 @@ struct QRCodeGeneratorView: View {
             // Code display
             Text(linkingCode.code)
                 .font(.system(size: 32, weight: .bold, design: .monospaced))
-                .foregroundStyle(.safetyOrange)
+                .foregroundStyle(Color.safetyOrange)
                 .tracking(8)
             
             // Expiration timer
@@ -287,11 +314,11 @@ struct QRCodeGeneratorView: View {
                     Text("Expires in \(formattedTimeRemaining)")
                 }
                 .font(.bodySmall)
-                .foregroundStyle(.textSecondary)
+                .foregroundStyle(Color.textSecondary)
             } else {
                 Text("Code expired")
                     .font(.bodySmall)
-                    .foregroundStyle(.statusDanger)
+                    .foregroundStyle(Color.statusDanger)
             }
         }
         .padding(DesignTokens.spacingLarge)

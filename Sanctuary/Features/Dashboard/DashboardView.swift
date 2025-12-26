@@ -1,3 +1,212 @@
+// MARK: - Add Trusted Contact View (inline for scope)
+import SwiftUI
+
+struct AddTrustedContactView: View {
+    @Environment(DependencyContainer.self) private var dependencies
+    @Environment(\.dismiss) private var dismiss
+    @State private var phoneNumber = ""
+    @State private var displayName = ""
+    @State private var isLoading = false
+    @State private var errorMessage: String?
+    var onAdd: (TrustedContact) -> Void
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section(header: Text("Contact Info")) {
+                    TextField("Name", text: $displayName)
+                        .disabled(isLoading)
+                    TextField("Phone Number", text: $phoneNumber)
+                        .keyboardType(.phonePad)
+                        .disabled(isLoading)
+                }
+                if let error = errorMessage {
+                    Text(error)
+                        .foregroundStyle(.red)
+                }
+            }
+            .overlay(
+                Group {
+                    if isLoading {
+                        ZStack {
+                            Color.black.opacity(0.2).ignoresSafeArea()
+                            ProgressView("Adding contact...")
+                        }
+                    }
+                }
+            )
+            .navigationTitle("Add Contact")
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Add") {
+                        addContact()
+                    }
+                    .disabled(displayName.isEmpty || phoneNumber.isEmpty || isLoading)
+                }
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") { dismiss() }
+                        .disabled(isLoading)
+                }
+            }
+        }
+    }
+    func addContact() {
+        isLoading = true
+        errorMessage = nil
+        Task {
+            guard let userId = dependencies.authManager.currentUser?.id else {
+                errorMessage = "Not authenticated. Please log in."
+                isLoading = false
+                return
+            }
+            do {
+                let newProfile = try await dependencies.profileRepository.addTrustedContact(for: userId, displayName: displayName, phoneNumber: phoneNumber)
+                // Convert Profile to ProfileJoined for the TrustedContact model
+                let joinedProfile = ProfileJoined(
+                    id: newProfile.id,
+                    phoneNumber: newProfile.phoneNumber,
+                    displayName: newProfile.displayName,
+                    avatarUrl: newProfile.avatarUrl,
+                    emergencyMessage: newProfile.emergencyMessage,
+                    isMonitoringEnabled: newProfile.isMonitoringEnabled,
+                    checkInIntervalMinutes: newProfile.checkInIntervalMinutes,
+                    createdAt: newProfile.createdAt,
+                    updatedAt: newProfile.updatedAt
+                )
+                let trustedContact = TrustedContact(
+                    trustedContactId: newProfile.id,
+                    relationType: .emergency, // or your default
+                    profiles: joinedProfile
+                )
+                onAdd(trustedContact)
+                dismiss()
+            } catch {
+                errorMessage = error.localizedDescription
+            }
+            isLoading = false
+        }
+    }
+}
+
+import SwiftUI
+
+struct TrustedContactsView: View {
+    @Environment(DependencyContainer.self) private var dependencies
+    @State private var contacts: [TrustedContact] = []
+    @State private var isLoading = false
+    @State private var showAddContact = false
+    @State private var errorMessage: String?
+    
+    var body: some View {
+        NavigationStack {
+            ZStack {
+                if isLoading {
+                    ProgressView("Loading contacts...")
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                } else if contacts.isEmpty {
+                    VStack(spacing: 16) {
+                        Image(systemName: "person.2.slash")
+                            .font(.system(size: 48))
+                            .foregroundStyle(.secondary)
+                        Text("No trusted contacts yet.")
+                            .font(.title3)
+                            .foregroundStyle(.secondary)
+                        Text("Add a trusted contact to receive alerts in an emergency.")
+                            .font(.body)
+                            .multilineTextAlignment(.center)
+                            .foregroundStyle(.secondary)
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                } else {
+                    List {
+                        ForEach(contacts) { contact in
+                            VStack(alignment: .leading) {
+                                Text(contact.displayName)
+                                    .font(.headline)
+                                Text(contact.phoneNumber ?? "")
+                                    .font(.subheadline)
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
+                        .onDelete(perform: deleteContact)
+                    }
+                }
+            }
+            .navigationTitle("Trusted Contacts")
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        showAddContact = true
+                    } label: {
+                        Image(systemName: "plus")
+                    }
+                    .disabled(isLoading)
+                }
+            }
+            .sheet(isPresented: $showAddContact) {
+                AddTrustedContactView(onAdd: { newContact in
+                    contacts.append(newContact)
+                    loadContacts()
+                })
+            }
+            .onAppear(perform: loadContacts)
+            .alert(isPresented: .constant(errorMessage != nil), content: {
+                Alert(title: Text("Error"), message: Text(errorMessage ?? "Unknown error"), dismissButton: .default(Text("OK"), action: { errorMessage = nil }))
+            })
+        }
+    }
+    
+    func loadContacts() {
+        isLoading = true
+        Task {
+            guard let userId = dependencies.authManager.currentUser?.id else {
+                errorMessage = "Not authenticated. Please log in."
+                isLoading = false
+                return
+            }
+            do {
+                contacts = try await dependencies.profileRepository.getTrustedContacts(for: userId)
+            } catch {
+                errorMessage = error.localizedDescription
+            }
+            isLoading = false
+        }
+    }
+    
+    func deleteContact(at offsets: IndexSet) {
+        let toDelete = offsets.map { contacts[$0] }
+        Task {
+            for contact in toDelete {
+                do {
+                    guard let userId = dependencies.authManager.currentUser?.id else {
+                        errorMessage = "Not authenticated. Please log in."
+                        return
+                    }
+                    try await dependencies.profileRepository.removeTrustedContact(for: userId, contactId: contact.id)
+                } catch {
+                    errorMessage = error.localizedDescription
+                }
+            }
+            loadContacts()
+        }
+    }
+}
+
+struct LocationSettingsView: View {
+    var body: some View {
+        VStack(spacing: 24) {
+            Image(systemName: "location.fill")
+                .font(.system(size: 48))
+                .foregroundStyle(Color.safetyOrange)
+            Text("Location sharing is always enabled for safety monitoring.")
+                .font(.title3)
+                .multilineTextAlignment(.center)
+            Text("You can manage location permissions in iOS Settings > Sanctuary.")
+                .font(.body)
+                .foregroundStyle(.secondary)
+        }
+        .padding()
+    }
+}
 //
 //  DashboardView.swift
 //  Sanctuary
@@ -9,34 +218,35 @@ import SwiftUI
 
 struct DashboardView: View {
     @Environment(DependencyContainer.self) private var dependencies
-    @State private var showingSettings = false
-    @State private var showingConsentSelection = false
+    enum ActiveSheet: Identifiable {
+        case settings, consent, contacts, location
+        var id: Int { hashValue }
+    }
+    @State private var activeSheet: ActiveSheet?
+    @State private var isCheckInSending = false
+    @State private var checkInError: String?
     
     var body: some View {
         NavigationStack {
+            Text("DEBUG: DashboardView loaded")
+                .foregroundColor(.green)
             ZStack {
                 // Background
                 backgroundView
-                
                 // Content
                 ScrollView {
                     VStack(spacing: DesignTokens.spacingLarge) {
-                        // Safety Status Card
                         SafetyStatusCard()
-                        
-                        // Bento Grid
                         BentoGridView(
-                            showingConsentSelection: $showingConsentSelection
+                            activeSheet: $activeSheet,
+                            onCheckIn: handleCheckIn
                         )
-                        
-                        // Recent Activity
                         RecentActivitySection()
                     }
                     .padding(.horizontal, DesignTokens.spacingMedium)
                     .padding(.top, DesignTokens.spacingMedium)
                     .padding(.bottom, 100)
                 }
-                
                 // Floating Panic Button
                 VStack {
                     Spacer()
@@ -49,27 +259,42 @@ struct DashboardView: View {
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
-                        showingSettings = true
+                        activeSheet = .settings
                     } label: {
                         Image(systemName: "gearshape.fill")
                             .foregroundStyle(Color.textSecondary)
                     }
                 }
             }
-            .sheet(isPresented: $showingSettings) {
-                SettingsView()
+            .sheet(item: $activeSheet) { item in
+                switch item {
+                case .settings: SettingsView()
+                case .consent: ConsentSelectionView()
+                case .contacts: TrustedContactsView()
+                case .location: LocationSettingsView()
+                }
             }
-            .sheet(isPresented: $showingConsentSelection) {
-                ConsentSelectionView()
-            }
+            .alert(isPresented: .constant(checkInError != nil), content: {
+                Alert(title: Text("Check-In Failed"), message: Text(checkInError ?? "Unknown error"), dismissButton: .default(Text("OK"), action: { checkInError = nil }))
+            })
+            .preferredColorScheme(.dark)
         }
-        .preferredColorScheme(.dark)
     }
-    
+
+    // Check-In action: send check-in SMS to trusted contacts
+    func handleCheckIn() {
+        isCheckInSending = true
+        Task {
+            let location = dependencies.safetyLocationManager.currentLocation
+            let message = "Check-in: I am safe."
+            await dependencies.safetyLocationManager.sendAlertToContacts(location: location ?? .init(latitude: 0, longitude: 0), message: message)
+            isCheckInSending = false
+        }
+    }
+
     @ViewBuilder
-    private var backgroundView: some View {
+    var backgroundView: some View {
         if dependencies.isPanicModeActive {
-            // Panic mode animated background
             TimelineView(.animation) { timeline in
                 let pulse = sin(timeline.date.timeIntervalSince1970 * 2) * 0.5 + 0.5
                 MeshGradient.panicMesh(pulse: pulse)
@@ -108,7 +333,7 @@ struct SafetyStatusCard: View {
                     
                     Text(statusSubtitle)
                         .font(.bodySmall)
-                        .foregroundStyle(.textSecondary)
+                        .foregroundStyle(Color.textSecondary)
                 }
                 
                 Spacer()
@@ -135,11 +360,11 @@ struct SafetyStatusCard: View {
             if !dependencies.safetyLocationManager.authorizationStatus.canMonitorInBackground {
                 HStack {
                     Image(systemName: "exclamationmark.triangle.fill")
-                        .foregroundStyle(.statusWarning)
+                        .foregroundStyle(Color.statusWarning)
                     
                     Text(dependencies.safetyLocationManager.authorizationStatus.displayMessage)
                         .font(.bodySmall)
-                        .foregroundStyle(.textSecondary)
+                        .foregroundStyle(Color.textSecondary)
                     
                     Spacer()
                     
@@ -147,7 +372,7 @@ struct SafetyStatusCard: View {
                         dependencies.safetyLocationManager.requestAlwaysAuthorization()
                     }
                     .font(.labelMedium)
-                    .foregroundStyle(.safetyOrange)
+                    .foregroundStyle(Color.safetyOrange)
                 }
                 .padding(DesignTokens.spacingSmall)
                 .background(Color.statusWarning.opacity(0.1))
@@ -182,8 +407,9 @@ struct SafetyStatusCard: View {
 // MARK: - Bento Grid
 
 struct BentoGridView: View {
-    @Binding var showingConsentSelection: Bool
-    
+    @Binding var activeSheet: DashboardView.ActiveSheet?
+    var onCheckIn: () -> Void
+
     var body: some View {
         LazyVGrid(columns: [
             GridItem(.flexible()),
@@ -196,9 +422,8 @@ struct BentoGridView: View {
                 subtitle: "2 active",
                 color: .pink
             ) {
-                showingConsentSelection = true
+                activeSheet = .consent
             }
-            
             // Trusted Contacts
             BentoCard(
                 icon: "person.2.fill",
@@ -206,9 +431,9 @@ struct BentoGridView: View {
                 subtitle: "3 trusted",
                 color: .blue
             ) {
-                // Navigate to contacts
+                print("Contacts card tapped!")
+                activeSheet = .contacts
             }
-            
             // Check-In Timer
             BentoCard(
                 icon: "timer",
@@ -216,9 +441,8 @@ struct BentoGridView: View {
                 subtitle: "Every 30 min",
                 color: .green
             ) {
-                // Configure timer
+                onCheckIn()
             }
-            
             // Location Sharing
             BentoCard(
                 icon: "location.fill",
@@ -226,10 +450,27 @@ struct BentoGridView: View {
                 subtitle: "Always on",
                 color: .safetyOrange
             ) {
-                // Location settings
+                activeSheet = .location
             }
         }
     }
+// Placeholder for location settings/screen
+struct LocationSettingsView: View {
+    var body: some View {
+        VStack(spacing: 24) {
+            Image(systemName: "location.fill")
+                .font(.system(size: 48))
+                .foregroundStyle(Color.safetyOrange)
+            Text("Location sharing is always enabled for safety monitoring.")
+                .font(.title3)
+                .multilineTextAlignment(.center)
+            Text("You can manage location permissions in iOS Settings > Sanctuary.")
+                .font(.body)
+                .foregroundStyle(.secondary)
+        }
+        .padding()
+    }
+}
 }
 
 struct BentoCard: View {
@@ -254,7 +495,7 @@ struct BentoCard: View {
                 
                 Text(subtitle)
                     .font(.labelSmall)
-                    .foregroundStyle(.textSecondary)
+                    .foregroundStyle(Color.textSecondary)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(DesignTokens.spacingMedium)
@@ -320,7 +561,7 @@ struct ActivityRow: View {
                 
                 Text(time)
                     .font(.labelSmall)
-                    .foregroundStyle(.textTertiary)
+                    .foregroundStyle(Color.textTertiary)
             }
             
             Spacer()
@@ -357,7 +598,7 @@ struct PanicButton: View {
                         .foregroundStyle(.white)
                 )
                 .scaleEffect(isPressed ? 0.95 : 1.0)
-                .glowShadow(color: dependencies.isPanicModeActive ? .statusDanger : .safetyOrange)
+                .glowShadow(color: dependencies.isPanicModeActive ? Color.statusDanger : Color.safetyOrange)
         }
         .gesture(
             DragGesture(minimumDistance: 0)
