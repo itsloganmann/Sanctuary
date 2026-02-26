@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Terms and Conditions - Sanctuary</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --black: #000000;
+      --surface: #0d0d0d;
+      --card: #141414;
+      --border: rgba(255,255,255,0.08);
+      --orange: #FF5F00;
+      --orange-dim: rgba(255,95,0,0.15);
+      --white: #ffffff;
+      --text-primary: #ffffff;
+      --text-secondary: rgba(255,255,255,0.65);
+      --text-tertiary: rgba(255,255,255,0.35);
+    }
+
+    html { background: var(--black); }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+      background: var(--black);
+      color: var(--text-primary);
+      line-height: 1.7;
+      min-height: 100vh;
+    }
+
+    header {
+      border-bottom: 1px solid var(--border);
+      padding: 20px 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo {
+      width: 36px;
+      height: 36px;
+      background: var(--orange);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .logo svg { width: 20px; height: 20px; fill: #fff; }
+
+    .brand { font-size: 18px; font-weight: 700; letter-spacing: -0.3px; }
+    .brand a { color: var(--white); text-decoration: none; }
+
+    main {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 60px 24px 80px;
+    }
+
+    .page-header { margin-bottom: 48px; }
+
+    .page-header h1 {
+      font-size: 36px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      margin-bottom: 8px;
+    }
+
+    .effective-date {
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    .effective-date span { color: var(--orange); }
+
+    .intro {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--orange);
+      border-radius: 12px;
+      padding: 20px 24px;
+      margin-bottom: 48px;
+      font-size: 15px;
+      color: var(--text-secondary);
+    }
+
+    .warning-box {
+      background: rgba(255,95,0,0.08);
+      border: 1px solid rgba(255,95,0,0.25);
+      border-radius: 12px;
+      padding: 18px 22px;
+      margin: 20px 0;
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    section { margin-bottom: 44px; }
+
+    h2 {
+      font-size: 20px;
+      font-weight: 600;
+      letter-spacing: -0.2px;
+      margin-bottom: 16px;
+      color: var(--white);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    h2::before {
+      content: '';
+      display: inline-block;
+      width: 4px;
+      height: 20px;
+      background: var(--orange);
+      border-radius: 2px;
+      flex-shrink: 0;
+    }
+
+    p { font-size: 15px; color: var(--text-secondary); margin-bottom: 14px; }
+    p:last-child { margin-bottom: 0; }
+
+    ul {
+      list-style: none;
+      padding: 0;
+      margin: 14px 0;
+    }
+
+    ul li {
+      font-size: 15px;
+      color: var(--text-secondary);
+      padding: 6px 0 6px 20px;
+      position: relative;
+    }
+
+    ul li::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 15px;
+      width: 6px;
+      height: 6px;
+      background: var(--orange);
+      border-radius: 50%;
+    }
+
+    strong { color: var(--white); }
+
+    .highlight {
+      color: var(--orange);
+      font-weight: 600;
+    }
+
+    .contact-box {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .contact-box a { color: var(--orange); text-decoration: none; }
+    .contact-box a:hover { text-decoration: underline; }
+
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 24px;
+      text-align: center;
+      font-size: 13px;
+      color: var(--text-tertiary);
+    }
+
+    footer a { color: var(--text-secondary); text-decoration: none; margin: 0 12px; }
+    footer a:hover { color: var(--orange); }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <svg viewBox="0 0 24 24"><path d="M12 2L4 6v6c0 5.25 3.5 10.15 8 11.35C16.5 22.15 20 17.25 20 12V6L12 2z"/></svg>
+  </div>
+  <div class="brand"><a href="index.html">Sanctuary</a></div>
+</header>
+
+<main>
+  <div class="page-header">
+    <h1>Terms and Conditions</h1>
+    <p class="effective-date">Effective Date: <span>January 1, 2025</span> &nbsp;|&nbsp; Last Updated: <span>February 2025</span></p>
+  </div>
+
+  <div class="intro">
+    These Terms and Conditions ("Terms") govern your use of the Sanctuary mobile application ("Application") and related services operated by Sanctuary ("we," "our," or "us"). By downloading and using the Application, you agree to be bound by these Terms. If you do not agree, do not use the Application.
+  </div>
+
+  <section>
+    <h2>Program Description</h2>
+    <p><strong>Program Name:</strong> Sanctuary Personal Safety and Consent Management</p>
+    <p>Sanctuary is a dual-purpose iOS application that provides:</p>
+    <ul>
+      <li><strong>Safety Monitoring:</strong> A personal safety system featuring a panic button, Dead Man's Switch timer, real-time location broadcasting to trusted contacts, and lock-screen accessible emergency widget.</li>
+      <li><strong>Consent Management:</strong> A friction-free communication tool for partners to express, document, and manage personal boundaries and consent agreements.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Eligibility and Account Registration</h2>
+    <p>You must be at least 18 years of age to use Sanctuary. By creating an account, you represent and warrant that:</p>
+    <ul>
+      <li>You are at least 18 years old.</li>
+      <li>You have the legal capacity to enter into a binding agreement.</li>
+      <li>The phone number and other information you provide during registration is accurate and belongs to you.</li>
+      <li>You will maintain the accuracy of your account information.</li>
+    </ul>
+    <p>You are responsible for maintaining the security of your account credentials. You agree to notify us immediately of any unauthorized access to your account.</p>
+  </section>
+
+  <section>
+    <h2>SMS Messaging Terms</h2>
+    <p>By providing your phone number and tapping "Continue" on the authentication screen, you expressly consent to receive SMS messages from Sanctuary for the following purposes:</p>
+    <ul>
+      <li><strong>One-Time Passcodes (OTP):</strong> SMS messages containing verification codes for account authentication. Message frequency: once per login or sign-up attempt.</li>
+      <li><strong>Safety Alerts:</strong> Outbound SMS messages sent to your designated trusted contacts on your behalf when you activate an emergency alert.</li>
+    </ul>
+    <p class="highlight">Message and data rates may apply. Message frequency varies based on your usage of safety features.</p>
+    <p>To get help, reply <strong>HELP</strong> to any Sanctuary message.<br/>To opt out of SMS, reply <strong>STOP</strong> to any Sanctuary message. After opting out, you will receive a single confirmation message. Authentication via SMS will no longer be available until you re-subscribe.<br/>To re-subscribe, reply <strong>START</strong>.</p>
+    <p>For support, email <a href="mailto:support@sanctuary.app" style="color:var(--orange);text-decoration:none;">support@sanctuary.app</a>.</p>
+  </section>
+
+  <section>
+    <h2>Acceptable Use</h2>
+    <p>You agree to use Sanctuary only for lawful purposes and in accordance with these Terms. You agree not to:</p>
+    <ul>
+      <li>Use the Application to harass, stalk, or cause harm to any person.</li>
+      <li>Submit false emergency alerts or misuse the panic button feature.</li>
+      <li>Add individuals as trusted contacts without their knowledge and consent.</li>
+      <li>Attempt to circumvent, disable, or interfere with the security features of the Application.</li>
+      <li>Use the Application in any manner that could damage, disable, or impair the service.</li>
+      <li>Violate any applicable local, state, national, or international law or regulation.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Safety Features and Limitations</h2>
+    <div class="warning-box">
+      IMPORTANT: Sanctuary is a supplemental safety tool and is NOT a substitute for emergency services. In a life-threatening emergency, always contact 911 or your local emergency services directly.
+    </div>
+    <p>The availability of safety features depends on:</p>
+    <ul>
+      <li>Active internet connectivity for location updates and alert delivery.</li>
+      <li>iOS location permissions set to "Always Allow."</li>
+      <li>A charged device with sufficient battery life.</li>
+      <li>Trusted contacts having functional phone service to receive SMS notifications.</li>
+    </ul>
+    <p>We do not guarantee the delivery or timeliness of safety alerts. Network conditions, carrier policies, and device settings may affect service availability.</p>
+  </section>
+
+  <section>
+    <h2>Consent Management Features</h2>
+    <p>The consent management features are designed to facilitate communication between consenting adults. They do not constitute a legally binding contract or replace professional legal, medical, or therapeutic advice. Users are responsible for ensuring all consent agreements are entered into freely and voluntarily by all parties involved.</p>
+  </section>
+
+  <section>
+    <h2>Intellectual Property</h2>
+    <p>The Application, including its content, features, and functionality, is owned by Sanctuary and is protected by applicable copyright, trademark, and other intellectual property laws. You are granted a limited, non-exclusive, non-transferable license to use the Application for your personal, non-commercial purposes.</p>
+  </section>
+
+  <section>
+    <h2>Disclaimer of Warranties</h2>
+    <p>THE APPLICATION IS PROVIDED "AS IS" AND "AS AVAILABLE" WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED. TO THE FULLEST EXTENT PERMITTED BY LAW, SANCTUARY DISCLAIMS ALL WARRANTIES, INCLUDING BUT NOT LIMITED TO IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT.</p>
+    <p>We do not warrant that the Application will be uninterrupted, error-free, or free of viruses or other harmful components.</p>
+  </section>
+
+  <section>
+    <h2>Limitation of Liability</h2>
+    <p>TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, SANCTUARY SHALL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, INCLUDING BUT NOT LIMITED TO LOSS OF LIFE, PERSONAL INJURY, PROPERTY DAMAGE, LOSS OF DATA, OR LOSS OF PROFITS, ARISING OUT OF OR RELATING TO YOUR USE OF OR INABILITY TO USE THE APPLICATION.</p>
+  </section>
+
+  <section>
+    <h2>Termination</h2>
+    <p>We reserve the right to terminate or suspend your account at any time, without notice, for conduct that we determine violates these Terms or is otherwise harmful to other users, the service, or third parties. You may terminate your account at any time by contacting us at support@sanctuary.app.</p>
+  </section>
+
+  <section>
+    <h2>Governing Law</h2>
+    <p>These Terms shall be governed by and construed in accordance with the laws of the United States, without regard to conflict of law provisions. Any disputes arising under these Terms shall be resolved through binding arbitration in accordance with the rules of the American Arbitration Association.</p>
+  </section>
+
+  <section>
+    <h2>Changes to These Terms</h2>
+    <p>We reserve the right to modify these Terms at any time. We will notify you of material changes by updating the effective date. Your continued use of the Application after changes are posted constitutes acceptance of the revised Terms.</p>
+  </section>
+
+  <section>
+    <h2>Contact and Support</h2>
+    <div class="contact-box">
+      <p>For questions about these Terms or to request account deletion, contact us:</p>
+      <ul>
+        <li>Email: <a href="mailto:support@sanctuary.app">support@sanctuary.app</a></li>
+        <li>Privacy inquiries: <a href="mailto:privacy@sanctuary.app">privacy@sanctuary.app</a></li>
+        <li>SMS Help: Reply <strong>HELP</strong> to any Sanctuary message</li>
+        <li>SMS Opt-Out: Reply <strong>STOP</strong> to any Sanctuary message</li>
+      </ul>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <p>
+    <a href="index.html">Home</a>
+    <a href="privacy-policy.html">Privacy Policy</a>
+    <a href="terms.html">Terms and Conditions</a>
+  </p>
+  <p style="margin-top:12px;">&copy; 2025 Sanctuary. All rights reserved.</p>
+</footer>
+
+</body>
+</html>
