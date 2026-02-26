@@ -8,7 +8,7 @@
 
 A dual-purpose personal safety and consent management iOS application. Sanctuary provides a lock-screen accessible panic button with real-time GPS alerting and a frictionless consent agreement system for partners.
 
-**Live Demo:** [https://itsloganmann.github.io/Sanctuary](https://itsloganmann.github.io/Sanctuary)
+**Live Demo:** [https://sanctuary-demo.vercel.app](https://sanctuary-demo.vercel.app)
 
 ---
 
