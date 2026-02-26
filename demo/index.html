@@ -1,0 +1,1337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sanctuary - iOS Demo</title>
+  <meta name="description" content="Interactive demo of the Sanctuary iOS personal safety and consent management app." />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --black: #000000;
+      --surface: #0d0d0d;
+      --card: #1c1c1e;
+      --card-hover: #2c2c2e;
+      --border: rgba(255,255,255,0.08);
+      --orange: #FF5F00;
+      --orange-light: #FF7A2B;
+      --orange-dim: rgba(255,95,0,0.15);
+      --green: #30D158;
+      --green-dim: rgba(48,209,88,0.15);
+      --red: #FF3B30;
+      --red-dim: rgba(255,59,48,0.15);
+      --blue: #0A84FF;
+      --blue-dim: rgba(10,132,255,0.15);
+      --yellow: #FFD60A;
+      --white: #ffffff;
+      --text-1: #ffffff;
+      --text-2: rgba(255,255,255,0.6);
+      --text-3: rgba(255,255,255,0.3);
+      --separator: rgba(255,255,255,0.08);
+    }
+
+    html { background: #0a0a0a; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", system-ui, sans-serif;
+      background: #0a0a0a;
+      color: var(--text-1);
+      line-height: 1.4;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ============================================================
+       PAGE LAYOUT
+    ============================================================ */
+    .page-header {
+      text-align: center;
+      margin-bottom: 36px;
+    }
+
+    .page-header h1 {
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      margin-bottom: 8px;
+    }
+
+    .page-header h1 span { color: var(--orange); }
+
+    .page-header p {
+      font-size: 15px;
+      color: var(--text-2);
+      max-width: 420px;
+      margin: 0 auto;
+    }
+
+    /* ============================================================
+       iPHONE FRAME
+    ============================================================ */
+    .iphone-frame {
+      width: 375px;
+      height: 812px;
+      background: var(--black);
+      border-radius: 50px;
+      border: 4px solid #2a2a2a;
+      overflow: hidden;
+      position: relative;
+      box-shadow:
+        0 0 0 2px #1a1a1a,
+        0 30px 80px rgba(0,0,0,0.6),
+        0 0 60px rgba(255,95,0,0.05);
+    }
+
+    /* Dynamic Island */
+    .dynamic-island {
+      position: absolute;
+      top: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 126px;
+      height: 36px;
+      background: #000;
+      border-radius: 20px;
+      z-index: 50;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: pointer;
+    }
+
+    .dynamic-island.expanded {
+      width: 350px;
+      height: 60px;
+      border-radius: 30px;
+      top: 10px;
+      padding: 0 20px;
+      justify-content: space-between;
+    }
+
+    .di-dot {
+      width: 12px;
+      height: 12px;
+      background: #1a1a1a;
+      border-radius: 50%;
+    }
+
+    .di-content {
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      font-size: 13px;
+    }
+
+    .dynamic-island.expanded .di-dot { display: none; }
+    .dynamic-island.expanded .di-content { display: flex; }
+
+    .di-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .di-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--orange-dim);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+    }
+
+    .di-label { font-weight: 600; font-size: 13px; }
+    .di-sublabel { font-size: 11px; color: var(--text-2); }
+
+    .di-timer {
+      font-size: 22px;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      color: var(--orange);
+    }
+
+    /* Screen content area */
+    .screen {
+      width: 100%;
+      height: 100%;
+      overflow-y: auto;
+      overflow-x: hidden;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+
+    .screen::-webkit-scrollbar { display: none; }
+
+    /* ============================================================
+       iOS STATUS BAR
+    ============================================================ */
+    .status-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 28px 8px;
+      font-size: 14px;
+      font-weight: 600;
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      background: var(--black);
+    }
+
+    .status-bar-right {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 12px;
+    }
+
+    /* ============================================================
+       APP CONTENT SCREENS
+    ============================================================ */
+    .app-screen {
+      display: none;
+      padding: 0 16px 100px;
+    }
+
+    .app-screen.active { display: block; }
+
+    .screen-title {
+      font-size: 32px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      padding: 52px 0 20px;
+    }
+
+    /* ============================================================
+       DASHBOARD SCREEN
+    ============================================================ */
+    .safety-card {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 12px;
+    }
+
+    .safety-status {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 16px;
+    }
+
+    .safety-ring {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      flex-shrink: 0;
+      transition: all 0.3s;
+    }
+
+    .safety-ring.safe {
+      background: var(--green-dim);
+      box-shadow: 0 0 0 6px rgba(48,209,88,0.08);
+    }
+
+    .safety-ring.active {
+      background: var(--orange-dim);
+      box-shadow: 0 0 0 6px rgba(255,95,0,0.12);
+      animation: ring-pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes ring-pulse {
+      0%, 100% { box-shadow: 0 0 0 6px rgba(255,95,0,0.08); }
+      50% { box-shadow: 0 0 0 14px rgba(255,95,0,0.03); }
+    }
+
+    .safety-info h3 { font-size: 17px; font-weight: 600; }
+    .safety-info p { font-size: 13px; color: var(--text-2); margin-top: 2px; }
+
+    .toggle-btn {
+      display: block;
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .toggle-btn.activate {
+      background: var(--orange);
+      color: var(--white);
+    }
+
+    .toggle-btn.deactivate {
+      background: var(--red-dim);
+      color: var(--red);
+    }
+
+    .toggle-btn:active { transform: scale(0.98); }
+
+    /* Contacts row */
+    .contacts-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+
+    .contact-chip {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      color: var(--text-2);
+      background: rgba(255,255,255,0.06);
+      border-radius: 20px;
+      padding: 6px 12px;
+    }
+
+    .contact-avatar {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      font-size: 10px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+    }
+
+    /* Metric cards row */
+    .metrics-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .metric-card {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 16px;
+    }
+
+    .metric-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .metric-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+    }
+
+    .metric-badge {
+      font-size: 10px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 20px;
+    }
+
+    .badge-green { background: var(--green-dim); color: var(--green); }
+    .badge-orange { background: var(--orange-dim); color: var(--orange); }
+    .badge-blue { background: var(--blue-dim); color: var(--blue); }
+
+    .metric-value {
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+
+    .metric-label {
+      font-size: 12px;
+      color: var(--text-3);
+      margin-top: 2px;
+    }
+
+    /* Activity feed */
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .section-label {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+    }
+
+    .section-badge {
+      font-size: 11px;
+      color: var(--text-3);
+    }
+
+    .activity-feed {
+      background: var(--card);
+      border-radius: 16px;
+      overflow: hidden;
+      margin-bottom: 12px;
+    }
+
+    .activity-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--separator);
+      transition: background 0.15s;
+    }
+
+    .activity-item:last-child { border-bottom: none; }
+
+    .activity-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+
+    .activity-content { flex: 1; min-width: 0; }
+
+    .activity-title {
+      font-size: 14px;
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .activity-time {
+      font-size: 12px;
+      color: var(--text-3);
+      margin-top: 1px;
+    }
+
+    .activity-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    @keyframes slide-in {
+      from { opacity: 0; transform: translateX(-12px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    .activity-item.new { animation: slide-in 0.3s ease; }
+
+    /* ============================================================
+       SAFETY SCREEN
+    ============================================================ */
+    .panic-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 0 32px;
+    }
+
+    .panic-btn {
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      border: none;
+      background: var(--orange);
+      color: var(--white);
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      cursor: pointer;
+      position: relative;
+      transition: transform 0.15s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 40px rgba(255,95,0,0.35);
+    }
+
+    .panic-btn::before {
+      content: '';
+      position: absolute;
+      inset: -12px;
+      border-radius: 50%;
+      border: 2px solid rgba(255,95,0,0.25);
+      animation: panic-ring 2s ease-in-out infinite;
+    }
+
+    .panic-btn::after {
+      content: '';
+      position: absolute;
+      inset: -24px;
+      border-radius: 50%;
+      border: 1px solid rgba(255,95,0,0.1);
+      animation: panic-ring 2s ease-in-out 0.5s infinite;
+    }
+
+    @keyframes panic-ring {
+      0%, 100% { transform: scale(1); opacity: 0.6; }
+      50% { transform: scale(1.1); opacity: 0.15; }
+    }
+
+    .panic-btn:active { transform: scale(0.92); }
+
+    .panic-btn.triggered {
+      background: var(--red);
+      box-shadow: 0 0 50px rgba(255,59,48,0.45);
+    }
+
+    .panic-btn.triggered::before { border-color: rgba(255,59,48,0.3); }
+    .panic-btn.triggered::after { border-color: rgba(255,59,48,0.15); }
+
+    .panic-instructions {
+      text-align: center;
+      margin-top: 24px;
+      font-size: 14px;
+      color: var(--text-2);
+    }
+
+    .panic-instructions strong { color: var(--text-1); }
+
+    .safety-info-card {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 16px;
+      margin-top: 24px;
+      width: 100%;
+    }
+
+    .safety-info-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--separator);
+      font-size: 14px;
+    }
+
+    .safety-info-row:last-child { border-bottom: none; }
+
+    .safety-info-row .label { color: var(--text-2); }
+    .safety-info-row .value { font-weight: 600; }
+
+    /* ============================================================
+       CONSENT SCREEN
+    ============================================================ */
+    .partner-card {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 16px;
+    }
+
+    .partner-avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #5E5CE6, #BF5AF2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .partner-info h3 { font-size: 16px; font-weight: 600; }
+    .partner-info p { font-size: 13px; color: var(--text-2); margin-top: 2px; }
+
+    .consent-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .consent-item {
+      background: var(--card);
+      border-radius: 14px;
+      padding: 16px 14px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      position: relative;
+      border: 1px solid transparent;
+    }
+
+    .consent-item.accepted {
+      border-color: rgba(48,209,88,0.25);
+      background: rgba(48,209,88,0.05);
+    }
+
+    .consent-item.pending {
+      border-color: rgba(255,214,10,0.25);
+      background: rgba(255,214,10,0.05);
+    }
+
+    .consent-item:active { transform: scale(0.97); }
+
+    .consent-emoji { font-size: 28px; margin-bottom: 8px; }
+
+    .consent-name { font-size: 13px; font-weight: 600; }
+
+    .consent-status {
+      font-size: 11px;
+      margin-top: 4px;
+    }
+
+    .consent-status.accepted { color: var(--green); }
+    .consent-status.pending { color: var(--yellow); }
+
+    /* ============================================================
+       SETTINGS SCREEN
+    ============================================================ */
+    .settings-group {
+      background: var(--card);
+      border-radius: 16px;
+      overflow: hidden;
+      margin-bottom: 16px;
+    }
+
+    .settings-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--separator);
+      font-size: 15px;
+    }
+
+    .settings-item:last-child { border-bottom: none; }
+
+    .settings-item-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .settings-icon {
+      width: 30px;
+      height: 30px;
+      border-radius: 7px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+    }
+
+    .settings-chevron {
+      color: var(--text-3);
+      font-size: 16px;
+    }
+
+    .ios-toggle {
+      width: 51px;
+      height: 31px;
+      border-radius: 16px;
+      background: rgba(255,255,255,0.15);
+      position: relative;
+      cursor: pointer;
+      transition: background 0.3s;
+      border: none;
+    }
+
+    .ios-toggle.on { background: var(--green); }
+
+    .ios-toggle::after {
+      content: '';
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 27px;
+      height: 27px;
+      border-radius: 50%;
+      background: white;
+      transition: transform 0.3s;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+
+    .ios-toggle.on::after { transform: translateX(20px); }
+
+    .settings-version {
+      text-align: center;
+      padding: 24px;
+      font-size: 13px;
+      color: var(--text-3);
+    }
+
+    /* ============================================================
+       TAB BAR
+    ============================================================ */
+    .tab-bar {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 84px;
+      background: rgba(13,13,13,0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-top: 1px solid var(--separator);
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-around;
+      padding-top: 8px;
+      z-index: 30;
+    }
+
+    .tab-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 4px 12px;
+      color: var(--text-3);
+      transition: color 0.2s;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .tab-item.active { color: var(--orange); }
+
+    .tab-icon { font-size: 22px; }
+
+    .tab-label {
+      font-size: 10px;
+      font-weight: 500;
+    }
+
+    /* ============================================================
+       TOAST
+    ============================================================ */
+    .ios-toast {
+      position: absolute;
+      top: 60px;
+      left: 16px;
+      right: 16px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px 16px;
+      font-size: 14px;
+      font-weight: 500;
+      z-index: 100;
+      opacity: 0;
+      transform: translateY(-10px);
+      transition: all 0.3s ease;
+      pointer-events: none;
+      text-align: center;
+    }
+
+    .ios-toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ============================================================
+       FOOTER LINKS
+    ============================================================ */
+    .page-footer {
+      margin-top: 36px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .page-footer-links {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .page-footer a {
+      font-size: 13px;
+      color: var(--text-3);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .page-footer a:hover { color: var(--orange); }
+
+    .page-footer .copyright {
+      font-size: 12px;
+      color: rgba(255,255,255,0.15);
+    }
+
+    /* ============================================================
+       RESPONSIVE
+    ============================================================ */
+    @media (max-width: 420px) {
+      body { padding: 0; justify-content: flex-start; }
+
+      .page-header { display: none; }
+
+      .iphone-frame {
+        width: 100%;
+        height: 100vh;
+        border-radius: 0;
+        border: none;
+        box-shadow: none;
+      }
+
+      .dynamic-island { display: none; }
+
+      .page-footer { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>🛡️ <span>Sanctuary</span></h1>
+  <p>Personal safety and consent management for iOS. Explore the interactive demo below.</p>
+</div>
+
+<!-- iPhone Frame -->
+<div class="iphone-frame">
+
+  <!-- Dynamic Island -->
+  <div class="dynamic-island" id="dynamicIsland" onclick="toggleDI()">
+    <div class="di-dot"></div>
+    <div class="di-content">
+      <div class="di-left">
+        <div class="di-icon">🛡️</div>
+        <div>
+          <div class="di-label">Sanctuary</div>
+          <div class="di-sublabel">Monitoring active</div>
+        </div>
+      </div>
+      <div class="di-timer" id="diTimer">25:00</div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="ios-toast" id="toast"></div>
+
+  <!-- Screen Content -->
+  <div class="screen">
+
+    <!-- Status Bar -->
+    <div class="status-bar">
+      <span>9:41</span>
+      <div class="status-bar-right">
+        <svg width="16" height="12" viewBox="0 0 16 12" fill="white"><rect x="0" y="3" width="3" height="9" rx="0.5" opacity="0.3"/><rect x="4.5" y="2" width="3" height="10" rx="0.5" opacity="0.5"/><rect x="9" y="0" width="3" height="12" rx="0.5" opacity="0.7"/><rect x="13" y="0" width="3" height="12" rx="0.5"/></svg>
+        <svg width="24" height="12" viewBox="0 0 24 12" fill="none"><rect x="0.5" y="0.5" width="21" height="11" rx="2" stroke="white" stroke-opacity="0.35"/><rect x="22.5" y="3.5" width="1.5" height="5" rx="0.5" fill="white" fill-opacity="0.35"/><rect x="2" y="2" width="15" height="8" rx="1" fill="#30D158"/></svg>
+      </div>
+    </div>
+
+    <!-- Dashboard Screen -->
+    <div class="app-screen active" id="screen-dashboard">
+      <div class="screen-title">Dashboard</div>
+
+      <!-- Safety Status -->
+      <div class="safety-card">
+        <div class="safety-status">
+          <div class="safety-ring safe" id="safetyRing">🛡️</div>
+          <div class="safety-info">
+            <h3 id="safetyTitle">You're Safe</h3>
+            <p id="safetySubtitle">Monitoring inactive</p>
+          </div>
+        </div>
+        <button class="toggle-btn activate" id="monitorBtn" onclick="toggleMonitoring()">
+          Activate Monitoring
+        </button>
+        <div class="contacts-row">
+          <div class="contact-chip">
+            <div class="contact-avatar" style="background:#5E5CE6;">S</div>
+            Sarah M.
+          </div>
+          <div class="contact-chip">
+            <div class="contact-avatar" style="background:#30D158;">J</div>
+            James K.
+          </div>
+          <div class="contact-chip">
+            <div class="contact-avatar" style="background:#0A84FF;">R</div>
+            Riley T.
+          </div>
+        </div>
+      </div>
+
+      <!-- Metrics -->
+      <div class="metrics-row">
+        <div class="metric-card">
+          <div class="metric-card-header">
+            <div class="metric-icon" style="background:var(--green-dim);">⏱</div>
+            <span class="metric-badge badge-green" id="checkinBadge">Active</span>
+          </div>
+          <div class="metric-value" id="checkinValue">25</div>
+          <div class="metric-label">min to check-in</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-card-header">
+            <div class="metric-icon" style="background:var(--blue-dim);">📍</div>
+            <span class="metric-badge badge-blue">GPS</span>
+          </div>
+          <div class="metric-value" id="gpsAccuracy">4m</div>
+          <div class="metric-label">accuracy</div>
+        </div>
+      </div>
+
+      <!-- Activity -->
+      <div class="section-header">
+        <div class="section-label">Activity</div>
+        <div class="section-badge" id="activityCount">3 events</div>
+      </div>
+      <div class="activity-feed" id="activityFeed">
+        <div class="activity-item">
+          <div class="activity-icon" style="background:var(--green-dim);">✓</div>
+          <div class="activity-content">
+            <div class="activity-title">Check-in confirmed</div>
+            <div class="activity-time">2 minutes ago</div>
+          </div>
+          <div class="activity-dot" style="background:var(--green);"></div>
+        </div>
+        <div class="activity-item">
+          <div class="activity-icon" style="background:rgba(94,92,230,0.15);">♥</div>
+          <div class="activity-content">
+            <div class="activity-title">Consent agreed – Communication</div>
+            <div class="activity-time">18 minutes ago</div>
+          </div>
+          <div class="activity-dot" style="background:#5E5CE6;"></div>
+        </div>
+        <div class="activity-item">
+          <div class="activity-icon" style="background:var(--blue-dim);">📍</div>
+          <div class="activity-content">
+            <div class="activity-title">Location ping received</div>
+            <div class="activity-time">1 hour ago</div>
+          </div>
+          <div class="activity-dot" style="background:var(--blue);"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Safety Screen -->
+    <div class="app-screen" id="screen-safety">
+      <div class="screen-title">Safety</div>
+
+      <div class="panic-section">
+        <button class="panic-btn" id="panicBtn"
+          onmousedown="startPanicHold()" onmouseup="cancelPanicHold()"
+          ontouchstart="startPanicHold()" ontouchend="cancelPanicHold()">
+          SOS
+        </button>
+        <div class="panic-instructions">
+          <strong>Hold for 1.5 seconds</strong> to send an emergency alert<br/>to all trusted contacts.
+        </div>
+      </div>
+
+      <div class="safety-info-card">
+        <div class="safety-info-row">
+          <span class="label">Trusted Contacts</span>
+          <span class="value">3 contacts</span>
+        </div>
+        <div class="safety-info-row">
+          <span class="label">Check-in Interval</span>
+          <span class="value">30 minutes</span>
+        </div>
+        <div class="safety-info-row">
+          <span class="label">Dead Man's Switch</span>
+          <span class="value" style="color:var(--green);">Enabled</span>
+        </div>
+        <div class="safety-info-row">
+          <span class="label">Location Sharing</span>
+          <span class="value" style="color:var(--green);">Always</span>
+        </div>
+        <div class="safety-info-row">
+          <span class="label">Last Alert</span>
+          <span class="value">Never</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Consent Screen -->
+    <div class="app-screen" id="screen-consent">
+      <div class="screen-title">Consent</div>
+
+      <div class="partner-card">
+        <div class="partner-avatar">A</div>
+        <div class="partner-info">
+          <h3>Alex & Jordan</h3>
+          <p>Linked via QR code · 6 of 8 agreed</p>
+        </div>
+      </div>
+
+      <div class="consent-grid">
+        <div class="consent-item accepted" onclick="showToast('💬 Communication — Accepted')">
+          <div class="consent-emoji">💬</div>
+          <div class="consent-name">Communication</div>
+          <div class="consent-status accepted">Accepted</div>
+        </div>
+        <div class="consent-item accepted" onclick="showToast('🔒 Privacy — Accepted')">
+          <div class="consent-emoji">🔒</div>
+          <div class="consent-name">Privacy</div>
+          <div class="consent-status accepted">Accepted</div>
+        </div>
+        <div class="consent-item accepted" onclick="showToast('🤝 Physical Touch — Accepted')">
+          <div class="consent-emoji">🤝</div>
+          <div class="consent-name">Physical</div>
+          <div class="consent-status accepted">Accepted</div>
+        </div>
+        <div class="consent-item accepted" onclick="showToast('🤗 Emotional — Accepted')">
+          <div class="consent-emoji">🤗</div>
+          <div class="consent-name">Emotional</div>
+          <div class="consent-status accepted">Accepted</div>
+        </div>
+        <div class="consent-item accepted" onclick="showToast('💳 Finances — Accepted')">
+          <div class="consent-emoji">💳</div>
+          <div class="consent-name">Finances</div>
+          <div class="consent-status accepted">Accepted</div>
+        </div>
+        <div class="consent-item accepted" onclick="showToast('📱 Social Media — Accepted')">
+          <div class="consent-emoji">📱</div>
+          <div class="consent-name">Social</div>
+          <div class="consent-status accepted">Accepted</div>
+        </div>
+        <div class="consent-item pending" onclick="showToast('✈️ Travel — Pending review')">
+          <div class="consent-emoji">✈️</div>
+          <div class="consent-name">Travel</div>
+          <div class="consent-status pending">Pending</div>
+        </div>
+        <div class="consent-item pending" onclick="showToast('💻 Digital Access — Pending review')">
+          <div class="consent-emoji">💻</div>
+          <div class="consent-name">Digital</div>
+          <div class="consent-status pending">Pending</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Settings Screen -->
+    <div class="app-screen" id="screen-settings">
+      <div class="screen-title">Settings</div>
+
+      <div class="settings-group">
+        <div class="settings-item">
+          <div class="settings-item-left">
+            <div class="settings-icon" style="background:var(--orange-dim);">🛡️</div>
+            <span>Safety Monitoring</span>
+          </div>
+          <button class="ios-toggle on" onclick="this.classList.toggle('on')"></button>
+        </div>
+        <div class="settings-item">
+          <div class="settings-item-left">
+            <div class="settings-icon" style="background:var(--green-dim);">📍</div>
+            <span>Background Location</span>
+          </div>
+          <button class="ios-toggle on" onclick="this.classList.toggle('on')"></button>
+        </div>
+        <div class="settings-item">
+          <div class="settings-item-left">
+            <div class="settings-icon" style="background:var(--blue-dim);">🔔</div>
+            <span>Notifications</span>
+          </div>
+          <button class="ios-toggle on" onclick="this.classList.toggle('on')"></button>
+        </div>
+      </div>
+
+      <div class="settings-group">
+        <div class="settings-item">
+          <div class="settings-item-left">
+            <div class="settings-icon" style="background:var(--blue-dim);">👤</div>
+            <span>Trusted Contacts</span>
+          </div>
+          <span class="settings-chevron">›</span>
+        </div>
+        <div class="settings-item">
+          <div class="settings-item-left">
+            <div class="settings-icon" style="background:rgba(94,92,230,0.15);">⏱</div>
+            <span>Check-in Interval</span>
+          </div>
+          <span style="color:var(--text-2);font-size:14px;">30 min ›</span>
+        </div>
+        <div class="settings-item">
+          <div class="settings-item-left">
+            <div class="settings-icon" style="background:var(--red-dim);">📨</div>
+            <span>Emergency Message</span>
+          </div>
+          <span class="settings-chevron">›</span>
+        </div>
+      </div>
+
+      <div class="settings-group">
+        <div class="settings-item">
+          <div class="settings-item-left">
+            <div class="settings-icon" style="background:rgba(255,255,255,0.06);">📄</div>
+            <span>Privacy Policy</span>
+          </div>
+          <span class="settings-chevron">›</span>
+        </div>
+        <div class="settings-item">
+          <div class="settings-item-left">
+            <div class="settings-icon" style="background:rgba(255,255,255,0.06);">📋</div>
+            <span>Terms and Conditions</span>
+          </div>
+          <span class="settings-chevron">›</span>
+        </div>
+      </div>
+
+      <div class="settings-version">Sanctuary v1.0.0 · iOS 18+</div>
+    </div>
+
+  </div><!-- /screen -->
+
+  <!-- Tab Bar -->
+  <div class="tab-bar">
+    <button class="tab-item active" onclick="switchTab('dashboard', this)">
+      <span class="tab-icon">🏠</span>
+      <span class="tab-label">Home</span>
+    </button>
+    <button class="tab-item" onclick="switchTab('safety', this)">
+      <span class="tab-icon">🆘</span>
+      <span class="tab-label">Safety</span>
+    </button>
+    <button class="tab-item" onclick="switchTab('consent', this)">
+      <span class="tab-icon">♥️</span>
+      <span class="tab-label">Consent</span>
+    </button>
+    <button class="tab-item" onclick="switchTab('settings', this)">
+      <span class="tab-icon">⚙️</span>
+      <span class="tab-label">Settings</span>
+    </button>
+  </div>
+
+</div><!-- /iphone-frame -->
+
+<!-- Page Footer -->
+<div class="page-footer">
+  <div class="page-footer-links">
+    <a href="https://github.com/itsloganmann/Sanctuary">GitHub</a>
+    <a href="https://itsloganmann.github.io/Sanctuary/privacy-policy.html">Privacy Policy</a>
+    <a href="https://itsloganmann.github.io/Sanctuary/terms.html">Terms</a>
+    <a href="mailto:support@sanctuary.app">Support</a>
+  </div>
+  <div class="copyright">&copy; 2025 Sanctuary. All rights reserved.</div>
+</div>
+
+<script>
+  // ---- Tab Switching ----
+  function switchTab(name, el) {
+    document.querySelectorAll('.app-screen').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+    document.getElementById('screen-' + name).classList.add('active');
+    el.classList.add('active');
+    document.querySelector('.screen').scrollTop = 0;
+  }
+
+  // ---- Toast ----
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2200);
+  }
+
+  // ---- Monitoring Toggle ----
+  let isMonitoring = false;
+
+  function toggleMonitoring() {
+    isMonitoring = !isMonitoring;
+    const ring = document.getElementById('safetyRing');
+    const title = document.getElementById('safetyTitle');
+    const subtitle = document.getElementById('safetySubtitle');
+    const btn = document.getElementById('monitorBtn');
+    const di = document.getElementById('dynamicIsland');
+
+    if (isMonitoring) {
+      ring.className = 'safety-ring active';
+      ring.textContent = '📡';
+      title.textContent = 'Monitoring Active';
+      subtitle.textContent = 'Broadcasting to 3 contacts';
+      btn.className = 'toggle-btn deactivate';
+      btn.textContent = 'Stop Monitoring';
+      di.classList.add('expanded');
+      addActivity('Safety monitoring activated', 'var(--orange)', '📡', 'var(--orange-dim)');
+      showToast('📡 Monitoring activated');
+      startDITimer();
+    } else {
+      ring.className = 'safety-ring safe';
+      ring.textContent = '🛡️';
+      title.textContent = "You're Safe";
+      subtitle.textContent = 'Monitoring inactive';
+      btn.className = 'toggle-btn activate';
+      btn.textContent = 'Activate Monitoring';
+      di.classList.remove('expanded');
+      addActivity('Monitoring deactivated', 'var(--text-3)', '✓', 'rgba(255,255,255,0.06)');
+      showToast('Monitoring stopped');
+      stopDITimer();
+    }
+  }
+
+  // ---- Dynamic Island Timer ----
+  let diTimerInterval = null;
+  let diSeconds = 1500; // 25 minutes
+
+  function startDITimer() {
+    diSeconds = 1500;
+    updateDITimerDisplay();
+    diTimerInterval = setInterval(() => {
+      diSeconds--;
+      if (diSeconds <= 0) diSeconds = 1800;
+      updateDITimerDisplay();
+    }, 1000);
+  }
+
+  function stopDITimer() {
+    clearInterval(diTimerInterval);
+    diTimerInterval = null;
+  }
+
+  function updateDITimerDisplay() {
+    const min = Math.floor(diSeconds / 60);
+    const sec = diSeconds % 60;
+    document.getElementById('diTimer').textContent =
+      String(min).padStart(2, '0') + ':' + String(sec).padStart(2, '0');
+  }
+
+  // ---- Panic Button ----
+  let panicTimer = null;
+  let panicTriggered = false;
+
+  function startPanicHold() {
+    if (panicTriggered) return;
+    const btn = document.getElementById('panicBtn');
+    btn.style.transform = 'scale(0.88)';
+    panicTimer = setTimeout(triggerPanic, 1500);
+  }
+
+  function cancelPanicHold() {
+    clearTimeout(panicTimer);
+    if (!panicTriggered) {
+      document.getElementById('panicBtn').style.transform = 'scale(1)';
+    }
+  }
+
+  function triggerPanic() {
+    panicTriggered = true;
+    const btn = document.getElementById('panicBtn');
+    btn.classList.add('triggered');
+    btn.textContent = '⚠️ SENT';
+    btn.style.transform = 'scale(1)';
+    addActivity('🚨 PANIC ALERT sent to 3 contacts', 'var(--red)', '⚠️', 'var(--red-dim)');
+    showToast('🚨 Emergency alert dispatched');
+
+    setTimeout(() => {
+      panicTriggered = false;
+      btn.classList.remove('triggered');
+      btn.textContent = 'SOS';
+    }, 4000);
+  }
+
+  // ---- Activity Feed ----
+  const activityTemplates = [
+    { text: 'Check-in confirmed', color: 'var(--green)', icon: '✓', bg: 'var(--green-dim)' },
+    { text: 'Location ping received', color: 'var(--blue)', icon: '📍', bg: 'var(--blue-dim)' },
+    { text: 'Sarah M. acknowledged alert', color: '#5E5CE6', icon: '💬', bg: 'rgba(94,92,230,0.15)' },
+    { text: 'Check-in timer reset', color: 'var(--orange)', icon: '⏱', bg: 'var(--orange-dim)' },
+    { text: 'GPS signal updated', color: 'var(--blue)', icon: '📡', bg: 'var(--blue-dim)' },
+    { text: 'Battery level: 87%', color: 'var(--green)', icon: '🔋', bg: 'var(--green-dim)' },
+  ];
+
+  let activityCount = 3;
+
+  function addActivity(text, dotColor, icon, iconBg) {
+    const feed = document.getElementById('activityFeed');
+    const item = document.createElement('div');
+    item.className = 'activity-item new';
+    item.innerHTML =
+      '<div class="activity-icon" style="background:' + iconBg + ';">' + icon + '</div>' +
+      '<div class="activity-content">' +
+        '<div class="activity-title">' + text + '</div>' +
+        '<div class="activity-time">Just now</div>' +
+      '</div>' +
+      '<div class="activity-dot" style="background:' + dotColor + ';"></div>';
+    feed.insertBefore(item, feed.firstChild);
+
+    while (feed.children.length > 5) feed.removeChild(feed.lastChild);
+
+    activityCount++;
+    document.getElementById('activityCount').textContent = activityCount + ' events';
+  }
+
+  function scheduleNextActivity() {
+    setTimeout(() => {
+      const t = activityTemplates[Math.floor(Math.random() * activityTemplates.length)];
+      addActivity(t.text, t.color, t.icon, t.bg);
+      scheduleNextActivity();
+    }, 6000 + Math.random() * 8000);
+  }
+
+  scheduleNextActivity();
+
+  // ---- Check-in Timer ----
+  let checkinMinutes = 25;
+
+  setInterval(() => {
+    checkinMinutes = checkinMinutes <= 0 ? 30 : checkinMinutes - 1;
+    document.getElementById('checkinValue').textContent = checkinMinutes;
+    const badge = document.getElementById('checkinBadge');
+    if (checkinMinutes <= 5) {
+      badge.className = 'metric-badge badge-orange';
+      badge.textContent = 'Due Soon';
+    } else {
+      badge.className = 'metric-badge badge-green';
+      badge.textContent = 'Active';
+    }
+  }, 10000);
+
+  // ---- GPS Accuracy ----
+  const gpsValues = ['3m', '4m', '5m', '3m', '6m', '4m'];
+  let gpsIdx = 0;
+
+  setInterval(() => {
+    gpsIdx = (gpsIdx + 1) % gpsValues.length;
+    document.getElementById('gpsAccuracy').textContent = gpsValues[gpsIdx];
+  }, 4000);
+
+  // ---- Dynamic Island Toggle (manual) ----
+  function toggleDI() {
+    const di = document.getElementById('dynamicIsland');
+    if (!isMonitoring) {
+      di.classList.toggle('expanded');
+      setTimeout(() => {
+        if (!isMonitoring) di.classList.remove('expanded');
+      }, 3000);
+    }
+  }
+</script>
+
+</body>
+</html>

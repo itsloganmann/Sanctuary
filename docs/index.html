@@ -4,1626 +4,182 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Sanctuary - Personal Safety and Consent Management</title>
-  <meta name="description" content="Sanctuary is a dual-purpose iOS safety and consent management application. Panic button, Dead Man's Switch, real-time location sharing, and frictionless consent agreements." />
+  <meta name="description" content="Sanctuary is a dual-purpose iOS personal safety and consent management application." />
   <style>
-    /* ============================================================
-       RESET & VARIABLES
-    ============================================================ */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
       --black: #000000;
-      --surface-1: #0a0a0a;
-      --surface-2: #111111;
-      --surface-3: #161616;
-      --card: #131313;
-      --card-hover: #1a1a1a;
-      --border: rgba(255,255,255,0.07);
-      --border-hover: rgba(255,255,255,0.14);
+      --card: #141414;
+      --border: rgba(255,255,255,0.08);
       --orange: #FF5F00;
-      --orange-light: #FF7A2B;
-      --orange-dim: rgba(255,95,0,0.12);
-      --orange-glow: rgba(255,95,0,0.25);
-      --green: #30D158;
-      --green-dim: rgba(48,209,88,0.12);
-      --red: #FF3B30;
-      --red-dim: rgba(255,59,48,0.12);
-      --blue: #0A84FF;
-      --blue-dim: rgba(10,132,255,0.12);
-      --yellow: #FFD60A;
+      --orange-dim: rgba(255,95,0,0.15);
       --white: #ffffff;
       --text-1: #ffffff;
       --text-2: rgba(255,255,255,0.65);
       --text-3: rgba(255,255,255,0.35);
-      --text-4: rgba(255,255,255,0.2);
-      --radius-sm: 8px;
-      --radius-md: 12px;
-      --radius-lg: 16px;
-      --radius-xl: 20px;
-      --radius-2xl: 24px;
     }
 
-    html { scroll-behavior: smooth; background: var(--black); }
+    html { background: var(--black); }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", system-ui, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", system-ui, sans-serif;
       background: var(--black);
       color: var(--text-1);
       line-height: 1.5;
-      overflow-x: hidden;
-      -webkit-font-smoothing: antialiased;
-    }
-
-    /* ============================================================
-       NAV
-    ============================================================ */
-    nav {
-      position: fixed;
-      top: 0; left: 0; right: 0;
-      z-index: 100;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 32px;
-      height: 60px;
-      background: rgba(0,0,0,0.7);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border-bottom: 1px solid var(--border);
-    }
-
-    .nav-brand {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 17px;
-      font-weight: 700;
-      letter-spacing: -0.3px;
-      text-decoration: none;
-      color: var(--white);
-    }
-
-    .nav-logo {
-      width: 32px;
-      height: 32px;
-      background: var(--orange);
-      border-radius: 9px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .nav-logo svg { width: 18px; height: 18px; fill: #fff; }
-
-    .nav-links { display: flex; align-items: center; gap: 8px; }
-
-    .nav-links a {
-      font-size: 13px;
-      color: var(--text-2);
-      text-decoration: none;
-      padding: 6px 12px;
-      border-radius: var(--radius-sm);
-      transition: color 0.2s, background 0.2s;
-    }
-
-    .nav-links a:hover { color: var(--white); background: rgba(255,255,255,0.06); }
-
-    .btn-nav {
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--white) !important;
-      background: var(--orange) !important;
-      padding: 7px 16px !important;
-      border-radius: 20px !important;
-    }
-
-    .btn-nav:hover { background: var(--orange-light) !important; }
-
-    /* ============================================================
-       HERO
-    ============================================================ */
-    .hero {
       min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      text-align: center;
-      padding: 120px 24px 80px;
-      position: relative;
-      overflow: hidden;
+      padding: 40px 24px;
+      -webkit-font-smoothing: antialiased;
     }
 
-    .hero-glow {
-      position: absolute;
-      top: 20%;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 600px;
-      height: 600px;
-      background: radial-gradient(circle, rgba(255,95,0,0.08) 0%, transparent 70%);
-      pointer-events: none;
-    }
-
-    .hero-tag {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 12px;
-      font-weight: 600;
-      letter-spacing: 0.5px;
-      text-transform: uppercase;
-      color: var(--orange);
-      background: var(--orange-dim);
-      border: 1px solid rgba(255,95,0,0.2);
-      border-radius: 20px;
-      padding: 5px 12px;
-      margin-bottom: 28px;
-    }
-
-    .hero-tag .dot {
-      width: 6px; height: 6px;
-      background: var(--orange);
-      border-radius: 50%;
-      animation: pulse-dot 2s ease-in-out infinite;
-    }
-
-    @keyframes pulse-dot {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.5; transform: scale(0.8); }
-    }
-
-    .hero h1 {
-      font-size: clamp(44px, 7vw, 80px);
-      font-weight: 700;
-      letter-spacing: -2px;
-      line-height: 1.05;
-      margin-bottom: 20px;
-    }
-
-    .hero h1 span { color: var(--orange); }
-
-    .hero p {
-      font-size: clamp(16px, 2vw, 19px);
-      color: var(--text-2);
-      max-width: 560px;
-      margin: 0 auto 40px;
-      line-height: 1.6;
-    }
-
-    .hero-actions {
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-      justify-content: center;
-    }
-
-    .btn-primary {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 15px;
-      font-weight: 600;
-      color: var(--white);
-      background: var(--orange);
-      padding: 14px 28px;
-      border-radius: 30px;
-      text-decoration: none;
-      transition: background 0.2s, transform 0.15s;
-      border: none;
-      cursor: pointer;
-    }
-
-    .btn-primary:hover { background: var(--orange-light); transform: translateY(-1px); }
-
-    .btn-secondary {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 15px;
-      font-weight: 600;
-      color: var(--text-1);
-      background: rgba(255,255,255,0.08);
-      border: 1px solid var(--border-hover);
-      padding: 14px 28px;
-      border-radius: 30px;
-      text-decoration: none;
-      transition: background 0.2s, transform 0.15s;
-      cursor: pointer;
-    }
-
-    .btn-secondary:hover { background: rgba(255,255,255,0.12); transform: translateY(-1px); }
-
-    .hero-stats {
-      display: flex;
-      gap: 40px;
-      margin-top: 72px;
-      flex-wrap: wrap;
-      justify-content: center;
-    }
-
-    .hero-stat {
+    .container {
+      max-width: 480px;
       text-align: center;
     }
 
-    .hero-stat .value {
+    .logo {
+      width: 64px;
+      height: 64px;
+      background: var(--orange);
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 24px;
+    }
+
+    .logo svg { width: 36px; height: 36px; fill: #fff; }
+
+    h1 {
       font-size: 32px;
       font-weight: 700;
       letter-spacing: -0.5px;
-      color: var(--white);
-    }
-
-    .hero-stat .label {
-      font-size: 13px;
-      color: var(--text-3);
-      margin-top: 2px;
-    }
-
-    .stat-divider {
-      width: 1px;
-      background: var(--border);
-      align-self: stretch;
-    }
-
-    /* ============================================================
-       DEMO DASHBOARD
-    ============================================================ */
-    .section {
-      padding: 100px 24px;
-    }
-
-    .section-inner {
-      max-width: 1100px;
-      margin: 0 auto;
-    }
-
-    .section-label {
-      font-size: 12px;
-      font-weight: 600;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      color: var(--orange);
       margin-bottom: 12px;
     }
 
-    .section-title {
-      font-size: clamp(28px, 4vw, 44px);
-      font-weight: 700;
-      letter-spacing: -1px;
-      line-height: 1.1;
-      margin-bottom: 16px;
-    }
-
-    .section-subtitle {
+    .subtitle {
       font-size: 16px;
       color: var(--text-2);
-      max-width: 500px;
+      margin-bottom: 40px;
       line-height: 1.6;
-      margin-bottom: 52px;
     }
 
-    /* Live Dashboard */
-    .demo-dashboard {
-      background: var(--surface-2);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-2xl);
-      overflow: hidden;
-      position: relative;
+    .links {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 40px;
     }
 
-    .demo-topbar {
+    .link-card {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 16px 20px;
-      border-bottom: 1px solid var(--border);
-      background: var(--surface-1);
-    }
-
-    .demo-topbar-left { display: flex; align-items: center; gap: 8px; }
-
-    .dot-red { width: 12px; height: 12px; background: #FF5F57; border-radius: 50%; }
-    .dot-yellow { width: 12px; height: 12px; background: #FFBD2E; border-radius: 50%; }
-    .dot-green { width: 12px; height: 12px; background: #28C840; border-radius: 50%; }
-
-    .demo-title { font-size: 13px; color: var(--text-3); }
-
-    .demo-live {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 11px;
-      font-weight: 600;
-      color: var(--green);
-      letter-spacing: 0.5px;
-      text-transform: uppercase;
-    }
-
-    .demo-live .live-dot {
-      width: 7px; height: 7px;
-      background: var(--green);
-      border-radius: 50%;
-      animation: blink 1.5s ease-in-out infinite;
-    }
-
-    @keyframes blink {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.3; }
-    }
-
-    .demo-body {
-      padding: 24px;
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 16px;
-    }
-
-    @media (max-width: 768px) {
-      .demo-body { grid-template-columns: 1fr; }
-      nav .nav-links { display: none; }
-    }
-
-    /* Metric Cards */
-    .metric-card {
       background: var(--card);
       border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      padding: 20px;
+      border-radius: 14px;
+      padding: 18px 20px;
+      text-decoration: none;
+      color: var(--text-1);
       transition: border-color 0.2s, background 0.2s;
     }
 
-    .metric-card:hover { border-color: var(--border-hover); background: var(--card-hover); }
-
-    .metric-card.span-2 { grid-column: span 2; }
-    .metric-card.full { grid-column: 1 / -1; }
-
-    .metric-header {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      margin-bottom: 16px;
+    .link-card:hover {
+      border-color: rgba(255,255,255,0.15);
+      background: #1a1a1a;
     }
 
-    .metric-icon {
-      width: 36px;
-      height: 36px;
+    .link-card-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .link-icon {
+      width: 40px;
+      height: 40px;
       border-radius: 10px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 16px;
+      font-size: 18px;
     }
 
-    .metric-icon.orange { background: var(--orange-dim); }
-    .metric-icon.green { background: var(--green-dim); }
-    .metric-icon.blue { background: var(--blue-dim); }
-    .metric-icon.red { background: var(--red-dim); }
+    .link-card-text h3 { font-size: 15px; font-weight: 600; }
+    .link-card-text p { font-size: 13px; color: var(--text-3); margin-top: 2px; }
 
-    .metric-badge {
-      font-size: 11px;
-      font-weight: 600;
-      padding: 3px 8px;
-      border-radius: 20px;
-    }
+    .chevron { color: var(--text-3); font-size: 20px; }
 
-    .badge-green { background: var(--green-dim); color: var(--green); }
-    .badge-orange { background: var(--orange-dim); color: var(--orange); }
-    .badge-red { background: var(--red-dim); color: var(--red); }
-    .badge-blue { background: var(--blue-dim); color: var(--blue); }
-
-    .metric-value {
-      font-size: 30px;
-      font-weight: 700;
-      letter-spacing: -0.5px;
-      line-height: 1;
-      margin-bottom: 4px;
-    }
-
-    .metric-label {
+    .footer-copy {
       font-size: 13px;
       color: var(--text-3);
-    }
-
-    .metric-delta {
-      font-size: 12px;
-      margin-top: 8px;
-    }
-
-    .delta-up { color: var(--green); }
-    .delta-down { color: var(--red); }
-
-    /* Safety Status Card */
-    .status-card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      padding: 20px;
-      grid-column: span 2;
-    }
-
-    .status-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 20px;
-    }
-
-    .status-indicator {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .status-ring {
-      width: 48px;
-      height: 48px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      position: relative;
-    }
-
-    .status-ring.safe {
-      background: var(--green-dim);
-      box-shadow: 0 0 0 8px rgba(48,209,88,0.06);
-    }
-
-    .status-ring.active {
-      background: var(--orange-dim);
-      box-shadow: 0 0 0 8px var(--orange-glow);
-      animation: pulse-ring 2s ease-in-out infinite;
-    }
-
-    @keyframes pulse-ring {
-      0%, 100% { box-shadow: 0 0 0 8px rgba(255,95,0,0.06); }
-      50% { box-shadow: 0 0 0 16px rgba(255,95,0,0.03); }
-    }
-
-    .status-text h3 { font-size: 16px; font-weight: 600; }
-    .status-text p { font-size: 13px; color: var(--text-3); margin-top: 2px; }
-
-    .status-toggle {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 13px;
-      font-weight: 500;
-      cursor: pointer;
-      padding: 8px 16px;
-      border-radius: 20px;
-      border: none;
-      transition: background 0.2s, color 0.2s;
-    }
-
-    .status-toggle.activate {
-      background: var(--orange-dim);
-      color: var(--orange);
-    }
-
-    .status-toggle.activate:hover { background: rgba(255,95,0,0.2); }
-
-    .status-toggle.deactivate {
-      background: var(--red-dim);
-      color: var(--red);
-    }
-
-    .contacts-row {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    .contact-chip {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 12px;
-      font-weight: 500;
-      color: var(--text-2);
-      background: rgba(255,255,255,0.05);
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      padding: 5px 10px;
-    }
-
-    .contact-avatar {
-      width: 18px; height: 18px;
-      border-radius: 50%;
-      font-size: 10px;
-      font-weight: 700;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--white);
-    }
-
-    /* Activity Feed */
-    .activity-feed { display: flex; flex-direction: column; gap: 8px; }
-
-    .activity-item {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 10px 12px;
-      background: rgba(255,255,255,0.03);
-      border-radius: var(--radius-md);
-      animation: slide-in 0.4s ease;
-      cursor: pointer;
-      transition: background 0.15s;
-    }
-
-    .activity-item:hover { background: rgba(255,255,255,0.06); }
-
-    @keyframes slide-in {
-      from { opacity: 0; transform: translateY(-8px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .activity-icon {
-      width: 30px;
-      height: 30px;
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 14px;
-      flex-shrink: 0;
-    }
-
-    .activity-content { flex: 1; min-width: 0; }
-
-    .activity-title {
-      font-size: 13px;
-      font-weight: 500;
-      color: var(--text-1);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .activity-time {
-      font-size: 11px;
-      color: var(--text-3);
-      margin-top: 1px;
-    }
-
-    .activity-dot {
-      width: 7px; height: 7px;
-      border-radius: 50%;
-      flex-shrink: 0;
-    }
-
-    /* Mini Chart */
-    .mini-chart {
-      height: 48px;
-      display: flex;
-      align-items: flex-end;
-      gap: 3px;
-      margin-top: 12px;
-    }
-
-    .chart-bar {
-      flex: 1;
-      background: var(--orange-dim);
-      border-radius: 3px 3px 0 0;
-      transition: height 0.6s ease, background 0.2s;
-      cursor: pointer;
-    }
-
-    .chart-bar:hover { background: rgba(255,95,0,0.35); }
-    .chart-bar.active { background: var(--orange); }
-
-    /* Progress Ring */
-    .ring-container {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      position: relative;
-      margin: 8px 0;
-    }
-
-    .ring-container svg { transform: rotate(-90deg); }
-
-    .ring-bg { fill: none; stroke: rgba(255,255,255,0.06); }
-    .ring-fill {
-      fill: none;
-      stroke-linecap: round;
-      transition: stroke-dashoffset 1s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    .ring-label {
-      position: absolute;
-      text-align: center;
-    }
-
-    .ring-label .ring-value { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
-    .ring-label .ring-unit { font-size: 11px; color: var(--text-3); }
-
-    /* Consent Badges */
-    .consent-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 8px;
-      margin-top: 4px;
-    }
-
-    @media (max-width: 500px) {
-      .consent-grid { grid-template-columns: repeat(2, 1fr); }
-    }
-
-    .consent-item {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 6px;
-      padding: 12px 8px;
-      border-radius: var(--radius-md);
-      background: rgba(255,255,255,0.03);
-      border: 1px solid var(--border);
-      cursor: pointer;
-      transition: background 0.15s, border-color 0.15s;
-      text-align: center;
-      position: relative;
-    }
-
-    .consent-item:hover { background: rgba(255,255,255,0.06); border-color: var(--border-hover); }
-
-    .consent-item.accepted { border-color: rgba(48,209,88,0.3); background: rgba(48,209,88,0.04); }
-    .consent-item.pending { border-color: rgba(255,189,46,0.3); background: rgba(255,189,46,0.04); }
-
-    .consent-emoji { font-size: 20px; }
-
-    .consent-name {
-      font-size: 11px;
-      font-weight: 500;
-      color: var(--text-2);
-    }
-
-    .consent-status-dot {
-      position: absolute;
-      top: 7px;
-      right: 7px;
-      width: 7px;
-      height: 7px;
-      border-radius: 50%;
-    }
-
-    .consent-status-dot.accepted { background: var(--green); }
-    .consent-status-dot.pending { background: var(--yellow); }
-
-    /* ============================================================
-       FEATURE SECTIONS
-    ============================================================ */
-    .features-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 1px;
-      background: var(--border);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-xl);
-      overflow: hidden;
-    }
-
-    @media (max-width: 900px) {
-      .features-grid { grid-template-columns: 1fr; }
-    }
-
-    .feature-block {
-      background: var(--surface-1);
-      padding: 36px 32px;
-      transition: background 0.2s;
-    }
-
-    .feature-block:hover { background: var(--surface-2); }
-
-    .feature-icon-wrap {
-      width: 48px;
-      height: 48px;
-      border-radius: 14px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 22px;
-      margin-bottom: 20px;
-    }
-
-    .feature-block h3 {
-      font-size: 17px;
-      font-weight: 600;
-      letter-spacing: -0.2px;
-      margin-bottom: 10px;
-    }
-
-    .feature-block p {
-      font-size: 14px;
-      color: var(--text-2);
-      line-height: 1.6;
-    }
-
-    /* ============================================================
-       HOW IT WORKS
-    ============================================================ */
-    .steps {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 24px;
-    }
-
-    @media (max-width: 900px) {
-      .steps { grid-template-columns: repeat(2, 1fr); }
-    }
-
-    @media (max-width: 500px) {
-      .steps { grid-template-columns: 1fr; }
-    }
-
-    .step {
-      position: relative;
-    }
-
-    .step-number {
-      font-size: 48px;
-      font-weight: 800;
-      letter-spacing: -2px;
-      color: rgba(255,255,255,0.04);
-      line-height: 1;
-      margin-bottom: 16px;
-    }
-
-    .step h4 {
-      font-size: 15px;
-      font-weight: 600;
-      margin-bottom: 8px;
-    }
-
-    .step p {
-      font-size: 13px;
-      color: var(--text-2);
-      line-height: 1.6;
-    }
-
-    /* ============================================================
-       TECH STACK
-    ============================================================ */
-    .tech-grid {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
-
-    .tech-pill {
-      display: flex;
-      align-items: center;
-      gap: 7px;
-      font-size: 13px;
-      font-weight: 500;
-      color: var(--text-2);
-      background: rgba(255,255,255,0.05);
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      padding: 7px 14px;
-      transition: border-color 0.2s, color 0.2s;
-    }
-
-    .tech-pill:hover { border-color: var(--border-hover); color: var(--white); }
-
-    .tech-dot {
-      width: 7px; height: 7px;
-      border-radius: 50%;
-    }
-
-    /* ============================================================
-       CTA
-    ============================================================ */
-    .cta-section {
-      text-align: center;
-      padding: 100px 24px;
-      background: linear-gradient(180deg, transparent 0%, rgba(255,95,0,0.04) 50%, transparent 100%);
-    }
-
-    .cta-section h2 {
-      font-size: clamp(32px, 5vw, 52px);
-      font-weight: 700;
-      letter-spacing: -1.5px;
-      margin-bottom: 16px;
-    }
-
-    .cta-section p {
-      font-size: 16px;
-      color: var(--text-2);
-      max-width: 440px;
-      margin: 0 auto 36px;
-    }
-
-    /* ============================================================
-       FOOTER
-    ============================================================ */
-    footer {
-      border-top: 1px solid var(--border);
-      padding: 40px 32px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 20px;
-    }
-
-    .footer-brand {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-weight: 600;
-      font-size: 15px;
-      color: var(--text-2);
-    }
-
-    .footer-links {
-      display: flex;
-      gap: 24px;
-      flex-wrap: wrap;
-    }
-
-    .footer-links a {
-      font-size: 13px;
-      color: var(--text-3);
-      text-decoration: none;
-      transition: color 0.2s;
-    }
-
-    .footer-links a:hover { color: var(--orange); }
-
-    .footer-copy { font-size: 12px; color: var(--text-4); }
-
-    /* ============================================================
-       PANIC DEMO BUTTON
-    ============================================================ */
-    .panic-demo-wrap {
-      display: flex;
-      justify-content: center;
-      margin-top: 8px;
-    }
-
-    .panic-demo-btn {
-      width: 80px;
-      height: 80px;
-      border-radius: 50%;
-      border: none;
-      background: var(--orange);
-      color: var(--white);
-      font-size: 13px;
-      font-weight: 700;
-      letter-spacing: 0.3px;
-      cursor: pointer;
-      position: relative;
-      transition: transform 0.15s;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 0 24px rgba(255,95,0,0.4);
-    }
-
-    .panic-demo-btn::before {
-      content: '';
-      position: absolute;
-      inset: -8px;
-      border-radius: 50%;
-      border: 2px solid rgba(255,95,0,0.3);
-      animation: panic-pulse 2s ease-in-out infinite;
-    }
-
-    @keyframes panic-pulse {
-      0%, 100% { transform: scale(1); opacity: 0.5; }
-      50% { transform: scale(1.15); opacity: 0.2; }
-    }
-
-    .panic-demo-btn:active { transform: scale(0.94); }
-
-    .panic-demo-btn.triggered {
-      background: var(--red);
-      box-shadow: 0 0 32px rgba(255,59,48,0.5);
-    }
-
-    /* Toast */
-    .toast {
-      position: fixed;
-      bottom: 28px;
-      left: 50%;
-      transform: translateX(-50%) translateY(20px);
-      background: var(--surface-3);
-      border: 1px solid var(--border-hover);
-      border-radius: var(--radius-xl);
-      padding: 12px 20px;
-      font-size: 14px;
-      font-weight: 500;
-      color: var(--white);
-      opacity: 0;
-      transition: opacity 0.3s, transform 0.3s;
-      z-index: 999;
-      pointer-events: none;
-      white-space: nowrap;
-    }
-
-    .toast.show {
-      opacity: 1;
-      transform: translateX(-50%) translateY(0);
-    }
-
-    /* Scroll hint */
-    .scroll-hint {
-      position: absolute;
-      bottom: 40px;
-      left: 50%;
-      transform: translateX(-50%);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 6px;
-      opacity: 0.4;
-    }
-
-    .scroll-hint span { font-size: 11px; color: var(--text-3); letter-spacing: 1px; text-transform: uppercase; }
-
-    .scroll-arrow {
-      width: 20px; height: 20px;
-      border-right: 1.5px solid var(--text-3);
-      border-bottom: 1.5px solid var(--text-3);
-      transform: rotate(45deg);
-      animation: bounce 1.5s ease-in-out infinite;
-    }
-
-    @keyframes bounce {
-      0%, 100% { transform: rotate(45deg) translateY(0); }
-      50% { transform: rotate(45deg) translateY(4px); }
-    }
-
-    /* Divider */
-    .divider {
-      height: 1px;
-      background: var(--border);
-      max-width: 1100px;
-      margin: 0 auto;
     }
   </style>
 </head>
 <body>
 
-<!-- Toast notification -->
-<div class="toast" id="toast"></div>
-
-<!-- Navigation -->
-<nav>
-  <a class="nav-brand" href="#">
-    <div class="nav-logo">
-      <svg viewBox="0 0 24 24"><path d="M12 2L4 6v6c0 5.25 3.5 10.15 8 11.35C16.5 22.15 20 17.25 20 12V6L12 2z"/></svg>
-    </div>
-    Sanctuary
-  </a>
-  <div class="nav-links">
-    <a href="#demo">Demo</a>
-    <a href="#features">Features</a>
-    <a href="#how">How It Works</a>
-    <a href="#tech">Tech</a>
-    <a href="privacy-policy.html">Privacy</a>
-    <a href="terms.html">Terms</a>
-    <a href="https://apps.apple.com" class="btn-nav">Get App</a>
-  </div>
-</nav>
-
-<!-- Hero -->
-<section class="hero">
-  <div class="hero-glow"></div>
-
-  <div class="hero-tag">
-    <div class="dot"></div>
-    iOS 18 App - Now Available
+<div class="container">
+  <div class="logo">
+    <svg viewBox="0 0 24 24"><path d="M12 2L4 6v6c0 5.25 3.5 10.15 8 11.35C16.5 22.15 20 17.25 20 12V6L12 2z"/></svg>
   </div>
 
-  <h1>Safety and consent,<br/><span>redesigned.</span></h1>
+  <h1>Sanctuary</h1>
+  <p class="subtitle">Personal safety and consent management for iOS. Emergency panic button, Dead Man's Switch, and frictionless consent agreements.</p>
 
-  <p>Sanctuary combines an emergency panic system with frictionless consent management. Your safety and your boundaries, always in reach.</p>
-
-  <div class="hero-actions">
-    <a href="#demo" class="btn-primary">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-      Live Demo
+  <div class="links">
+    <a class="link-card" href="https://sanctuary-demo.vercel.app">
+      <div class="link-card-left">
+        <div class="link-icon" style="background:var(--orange-dim);">📱</div>
+        <div class="link-card-text">
+          <h3>Live Demo</h3>
+          <p>Interactive iOS app demo</p>
+        </div>
+      </div>
+      <span class="chevron">›</span>
     </a>
-    <a href="https://github.com/itsloganmann/Sanctuary" class="btn-secondary">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 21.795 24 17.295 24 12c0-6.63-5.37-12-12-12"/></svg>
-      View Source
+
+    <a class="link-card" href="privacy-policy.html">
+      <div class="link-card-left">
+        <div class="link-icon" style="background:rgba(10,132,255,0.15);">🔒</div>
+        <div class="link-card-text">
+          <h3>Privacy Policy</h3>
+          <p>How we handle your data</p>
+        </div>
+      </div>
+      <span class="chevron">›</span>
     </a>
-  </div>
 
-  <div class="hero-stats">
-    <div class="hero-stat">
-      <div class="value" id="stat-users">12,847</div>
-      <div class="label">Protected Users</div>
-    </div>
-    <div class="stat-divider"></div>
-    <div class="hero-stat">
-      <div class="value" id="stat-alerts">3,291</div>
-      <div class="label">Alerts Sent</div>
-    </div>
-    <div class="stat-divider"></div>
-    <div class="hero-stat">
-      <div class="value">&lt; 2s</div>
-      <div class="label">Alert Delivery</div>
-    </div>
-    <div class="stat-divider"></div>
-    <div class="hero-stat">
-      <div class="value">99.9%</div>
-      <div class="label">Uptime</div>
-    </div>
-  </div>
-
-  <div class="scroll-hint">
-    <span>Scroll</span>
-    <div class="scroll-arrow"></div>
-  </div>
-</section>
-
-<!-- Live Demo Dashboard -->
-<section class="section" id="demo">
-  <div class="section-inner">
-    <div class="section-label">Interactive Demo</div>
-    <div class="section-title">Real-time safety dashboard</div>
-    <div class="section-subtitle">This is a live simulation of the Sanctuary monitoring dashboard. Data updates automatically.</div>
-
-    <div class="demo-dashboard">
-      <div class="demo-topbar">
-        <div class="demo-topbar-left">
-          <div class="dot-red"></div>
-          <div class="dot-yellow"></div>
-          <div class="dot-green"></div>
-        </div>
-        <div class="demo-title">Sanctuary Dashboard - Alex Johnson</div>
-        <div class="demo-live">
-          <div class="live-dot"></div>
-          Live
+    <a class="link-card" href="terms.html">
+      <div class="link-card-left">
+        <div class="link-icon" style="background:rgba(94,92,230,0.15);">📋</div>
+        <div class="link-card-text">
+          <h3>Terms and Conditions</h3>
+          <p>Terms of service</p>
         </div>
       </div>
-
-      <div class="demo-body">
-
-        <!-- Safety Status Card -->
-        <div class="status-card">
-          <div class="status-header">
-            <div class="status-indicator">
-              <div class="status-ring safe" id="statusRing">
-                <span style="font-size:20px;">🛡</span>
-              </div>
-              <div class="status-text">
-                <h3 id="statusTitle">You're Safe</h3>
-                <p id="statusSubtitle">Monitoring inactive - all clear</p>
-              </div>
-            </div>
-            <button class="status-toggle activate" id="toggleBtn" onclick="toggleMonitoring()">
-              Activate Monitoring
-            </button>
-          </div>
-          <div class="contacts-row" id="contactsRow">
-            <div class="contact-chip">
-              <div class="contact-avatar" style="background:#5E5CE6;">S</div>
-              Sarah M.
-            </div>
-            <div class="contact-chip">
-              <div class="contact-avatar" style="background:#30D158;">J</div>
-              James K.
-            </div>
-            <div class="contact-chip">
-              <div class="contact-avatar" style="background:#0A84FF;">R</div>
-              Riley T.
-            </div>
-            <div class="contact-chip" style="cursor:pointer;border-style:dashed;" onclick="showToast('Add trusted contact')">
-              + Add
-            </div>
-          </div>
-        </div>
-
-        <!-- Check-in Timer -->
-        <div class="metric-card">
-          <div class="metric-header">
-            <div class="metric-icon green">
-              <span>&#9201;</span>
-            </div>
-            <span class="metric-badge badge-green" id="checkinBadge">Active</span>
-          </div>
-          <div class="ring-container">
-            <svg width="80" height="80" viewBox="0 0 80 80">
-              <circle class="ring-bg" cx="40" cy="40" r="34" stroke-width="6"/>
-              <circle class="ring-fill" id="checkinRing" cx="40" cy="40" r="34"
-                stroke="#30D158" stroke-width="6"
-                stroke-dasharray="213.6"
-                stroke-dashoffset="53.4"/>
-            </svg>
-            <div class="ring-label">
-              <div class="ring-value" id="checkinValue">25</div>
-              <div class="ring-unit">min left</div>
-            </div>
-          </div>
-          <div class="metric-label" style="text-align:center;margin-top:4px;">Check-in every 30 min</div>
-        </div>
-
-        <!-- Panic Button Demo -->
-        <div class="metric-card">
-          <div class="metric-header">
-            <div class="metric-icon red">
-              <span>&#9888;</span>
-            </div>
-            <span class="metric-badge badge-orange">Hold to Activate</span>
-          </div>
-          <div class="panic-demo-wrap">
-            <button class="panic-demo-btn" id="panicBtn"
-              onmousedown="startPanicHold()" onmouseup="cancelPanicHold()"
-              ontouchstart="startPanicHold()" ontouchend="cancelPanicHold()">
-              SOS
-            </button>
-          </div>
-          <div class="metric-label" style="text-align:center;margin-top:12px;font-size:12px;">Hold 1.5s to trigger alert</div>
-        </div>
-
-        <!-- Alert Activity Feed -->
-        <div class="metric-card span-2">
-          <div class="metric-header">
-            <div style="font-size:14px;font-weight:600;">Live Activity</div>
-            <span class="metric-badge badge-blue" id="activityCount">3 events</span>
-          </div>
-          <div class="activity-feed" id="activityFeed">
-            <div class="activity-item">
-              <div class="activity-icon orange" style="background:var(--orange-dim);">&#10003;</div>
-              <div class="activity-content">
-                <div class="activity-title">Check-in confirmed by Alex</div>
-                <div class="activity-time">2 minutes ago</div>
-              </div>
-              <div class="activity-dot" style="background:var(--green);"></div>
-            </div>
-            <div class="activity-item">
-              <div class="activity-icon" style="background:rgba(94,92,230,0.15);color:#5E5CE6;">&#x2665;</div>
-              <div class="activity-content">
-                <div class="activity-title">Consent agreement accepted - Communication</div>
-                <div class="activity-time">18 minutes ago</div>
-              </div>
-              <div class="activity-dot" style="background:#5E5CE6;"></div>
-            </div>
-            <div class="activity-item">
-              <div class="activity-icon" style="background:var(--blue-dim);">&#x1F4CD;</div>
-              <div class="activity-content">
-                <div class="activity-title">Safety monitoring activated</div>
-                <div class="activity-time">1 hour ago</div>
-              </div>
-              <div class="activity-dot" style="background:var(--blue);"></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Location Stats -->
-        <div class="metric-card">
-          <div class="metric-header">
-            <div class="metric-icon blue"><span>&#x1F4CD;</span></div>
-            <span class="metric-badge badge-blue">GPS</span>
-          </div>
-          <div class="metric-value" id="locationAccuracy">4m</div>
-          <div class="metric-label">GPS Accuracy</div>
-          <div class="mini-chart" id="locationChart">
-            <div class="chart-bar" style="height:60%;"></div>
-            <div class="chart-bar" style="height:45%;"></div>
-            <div class="chart-bar" style="height:70%;"></div>
-            <div class="chart-bar" style="height:55%;"></div>
-            <div class="chart-bar active" style="height:80%;"></div>
-            <div class="chart-bar" style="height:65%;"></div>
-            <div class="chart-bar" style="height:50%;"></div>
-          </div>
-          <div class="metric-delta delta-up" style="margin-top:8px;">&#x25B2; Signal Strong</div>
-        </div>
-
-        <!-- Consent Agreements -->
-        <div class="metric-card full">
-          <div class="metric-header">
-            <div style="font-size:14px;font-weight:600;">Active Consent Agreements</div>
-            <span class="metric-badge badge-green">6 of 8 accepted</span>
-          </div>
-          <div class="consent-grid">
-            <div class="consent-item accepted" onclick="showToast('Communication - Accepted')">
-              <div class="consent-status-dot accepted"></div>
-              <div class="consent-emoji">&#x1F4AC;</div>
-              <div class="consent-name">Communication</div>
-            </div>
-            <div class="consent-item accepted" onclick="showToast('Privacy - Accepted')">
-              <div class="consent-status-dot accepted"></div>
-              <div class="consent-emoji">&#x1F512;</div>
-              <div class="consent-name">Privacy</div>
-            </div>
-            <div class="consent-item accepted" onclick="showToast('Physical Touch - Accepted')">
-              <div class="consent-status-dot accepted"></div>
-              <div class="consent-emoji">&#x1F91D;</div>
-              <div class="consent-name">Physical</div>
-            </div>
-            <div class="consent-item accepted" onclick="showToast('Emotional Safety - Accepted')">
-              <div class="consent-status-dot accepted"></div>
-              <div class="consent-emoji">&#x1F917;</div>
-              <div class="consent-name">Emotional</div>
-            </div>
-            <div class="consent-item accepted" onclick="showToast('Finances - Accepted')">
-              <div class="consent-status-dot accepted"></div>
-              <div class="consent-emoji">&#x1F4B3;</div>
-              <div class="consent-name">Finances</div>
-            </div>
-            <div class="consent-item accepted" onclick="showToast('Social Media - Accepted')">
-              <div class="consent-status-dot accepted"></div>
-              <div class="consent-emoji">&#x1F4F1;</div>
-              <div class="consent-name">Social</div>
-            </div>
-            <div class="consent-item pending" onclick="showToast('Travel - Pending review')">
-              <div class="consent-status-dot pending"></div>
-              <div class="consent-emoji">&#x2708;&#xFE0F;</div>
-              <div class="consent-name">Travel</div>
-            </div>
-            <div class="consent-item pending" onclick="showToast('Digital Access - Pending review')">
-              <div class="consent-status-dot pending"></div>
-              <div class="consent-emoji">&#x1F4BB;</div>
-              <div class="consent-name">Digital</div>
-            </div>
-          </div>
-        </div>
-
-      </div><!-- /demo-body -->
-    </div><!-- /demo-dashboard -->
-  </div>
-</section>
-
-<div class="divider"></div>
-
-<!-- Features -->
-<section class="section" id="features">
-  <div class="section-inner">
-    <div class="section-label">Core Features</div>
-    <div class="section-title">Built for critical moments</div>
-    <div class="section-subtitle">Every feature is designed to work when it matters most, with minimal friction and maximum reliability.</div>
-
-    <div class="features-grid">
-      <div class="feature-block">
-        <div class="feature-icon-wrap" style="background:var(--red-dim);">&#9888;</div>
-        <h3>Panic Button</h3>
-        <p>Hold-to-activate mechanism prevents false triggers. Dispatches your GPS coordinates to all trusted contacts via SMS within 2 seconds.</p>
-      </div>
-      <div class="feature-block">
-        <div class="feature-icon-wrap" style="background:var(--orange-dim);">&#9201;</div>
-        <h3>Dead Man's Switch</h3>
-        <p>Configurable check-in timer automatically escalates to an alert if you fail to check in. Customizable intervals from 15 minutes to 24 hours.</p>
-      </div>
-      <div class="feature-block">
-        <div class="feature-icon-wrap" style="background:var(--blue-dim);">&#x1F4CD;</div>
-        <h3>Live Location</h3>
-        <p>Real-time GPS tracking using iOS CoreLocation with CLBackgroundActivitySession, delivering continuous updates even when the app is backgrounded.</p>
-      </div>
-      <div class="feature-block">
-        <div class="feature-icon-wrap" style="background:rgba(94,92,230,0.15);">&#x2665;</div>
-        <h3>Consent Manager</h3>
-        <p>Tinder-style swipe interface for expressing and documenting personal boundaries across 8 customizable categories. QR code partner linking.</p>
-      </div>
-      <div class="feature-block">
-        <div class="feature-icon-wrap" style="background:var(--green-dim);">&#x1F510;</div>
-        <h3>Lock Screen Widget</h3>
-        <p>Interactive WidgetKit extension enables check-in and panic activation without unlocking your phone. Dynamic Island support included.</p>
-      </div>
-      <div class="feature-block">
-        <div class="feature-icon-wrap" style="background:rgba(255,214,10,0.12);">&#x1F514;</div>
-        <h3>Smart Alerts</h3>
-        <p>Supabase Realtime powers instant push notifications and live activity updates. Trusted contacts receive structured SMS with location links.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<div class="divider"></div>
-
-<!-- How It Works -->
-<section class="section" id="how" style="background:var(--surface-1);">
-  <div class="section-inner">
-    <div class="section-label">How It Works</div>
-    <div class="section-title">Designed for speed and simplicity</div>
-    <div class="section-subtitle">From installation to active protection in under 3 minutes.</div>
-
-    <div class="steps">
-      <div class="step">
-        <div class="step-number">01</div>
-        <h4>Download and Sign Up</h4>
-        <p>Install from the App Store. Verify your phone number with a one-time SMS passcode. Your number becomes your secure account identifier.</p>
-      </div>
-      <div class="step">
-        <div class="step-number">02</div>
-        <h4>Add Trusted Contacts</h4>
-        <p>Designate up to 10 trusted contacts who will receive your location and status during a safety event. They receive a brief orientation SMS.</p>
-      </div>
-      <div class="step">
-        <div class="step-number">03</div>
-        <h4>Configure Your Safety Plan</h4>
-        <p>Set check-in intervals, customize your emergency message, and pair with a partner via QR code for consent management features.</p>
-      </div>
-      <div class="step">
-        <div class="step-number">04</div>
-        <h4>Protected 24/7</h4>
-        <p>Add the widget to your lock screen. One tap activates monitoring. Hold SOS in a panic. Your contacts are alerted immediately.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<div class="divider"></div>
-
-<!-- Tech Stack -->
-<section class="section" id="tech">
-  <div class="section-inner">
-    <div class="section-label">Technology</div>
-    <div class="section-title">Production-grade architecture</div>
-    <div class="section-subtitle">Built with industry-standard frameworks and services designed for reliability at scale.</div>
-
-    <div class="tech-grid">
-      <div class="tech-pill"><div class="tech-dot" style="background:#F05138;"></div> Swift 6</div>
-      <div class="tech-pill"><div class="tech-dot" style="background:#2196F3;"></div> SwiftUI + iOS 18</div>
-      <div class="tech-pill"><div class="tech-dot" style="background:#3ECF8E;"></div> Supabase</div>
-      <div class="tech-pill"><div class="tech-dot" style="background:#F22F46;"></div> Twilio</div>
-      <div class="tech-pill"><div class="tech-dot" style="background:#30D158;"></div> WidgetKit</div>
-      <div class="tech-pill"><div class="tech-dot" style="background:#FF5F00;"></div> CoreLocation</div>
-      <div class="tech-pill"><div class="tech-dot" style="background:#5E5CE6;"></div> App Intents</div>
-      <div class="tech-pill"><div class="tech-dot" style="background:#FFD60A;"></div> Live Activities</div>
-      <div class="tech-pill"><div class="tech-dot" style="background:#0A84FF;"></div> PostgreSQL</div>
-      <div class="tech-pill"><div class="tech-dot" style="background:#FF9F0A;"></div> Edge Functions</div>
-      <div class="tech-pill"><div class="tech-dot" style="background:#64D2FF;"></div> Realtime Subscriptions</div>
-      <div class="tech-pill"><div class="tech-dot" style="background:#BF5AF2;"></div> Row-Level Security</div>
-      <div class="tech-pill"><div class="tech-dot" style="background:#32ADE6;"></div> Keychain Storage</div>
-      <div class="tech-pill"><div class="tech-dot" style="background:#FF375F;"></div> A2P 10DLC Compliant</div>
-    </div>
-  </div>
-</section>
-
-<div class="divider"></div>
-
-<!-- CTA -->
-<section class="cta-section">
-  <h2>Your safety, always in reach.</h2>
-  <p>Join thousands of users who trust Sanctuary for personal protection and communication.</p>
-  <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
-    <a href="https://apps.apple.com" class="btn-primary">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
-      Download for iOS
+      <span class="chevron">›</span>
     </a>
-    <a href="https://github.com/itsloganmann/Sanctuary" class="btn-secondary">
-      View on GitHub
+
+    <a class="link-card" href="https://github.com/itsloganmann/Sanctuary">
+      <div class="link-card-left">
+        <div class="link-icon" style="background:rgba(255,255,255,0.06);">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 21.795 24 17.295 24 12c0-6.63-5.37-12-12-12"/></svg>
+        </div>
+        <div class="link-card-text">
+          <h3>Source Code</h3>
+          <p>View on GitHub</p>
+        </div>
+      </div>
+      <span class="chevron">›</span>
     </a>
   </div>
-</section>
 
-<!-- Footer -->
-<footer>
-  <div class="footer-brand">
-    <div class="nav-logo" style="width:28px;height:28px;border-radius:8px;">
-      <svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:#fff;"><path d="M12 2L4 6v6c0 5.25 3.5 10.15 8 11.35C16.5 22.15 20 17.25 20 12V6L12 2z"/></svg>
-    </div>
-    Sanctuary
-  </div>
-  <div class="footer-links">
-    <a href="privacy-policy.html">Privacy Policy</a>
-    <a href="terms.html">Terms and Conditions</a>
-    <a href="https://github.com/itsloganmann/Sanctuary">GitHub</a>
-    <a href="mailto:support@sanctuary.app">Support</a>
-  </div>
-  <div class="footer-copy">&copy; 2025 Sanctuary. All rights reserved.</div>
-</footer>
-
-<!-- ============================================================
-     JAVASCRIPT - Live Demo Logic
-============================================================ -->
-<script>
-  // Toast notification
-  function showToast(msg) {
-    const t = document.getElementById('toast');
-    t.textContent = msg;
-    t.classList.add('show');
-    setTimeout(() => t.classList.remove('show'), 2500);
-  }
-
-  // ---- Monitoring Toggle ----
-  let isMonitoring = false;
-
-  function toggleMonitoring() {
-    isMonitoring = !isMonitoring;
-    const ring = document.getElementById('statusRing');
-    const title = document.getElementById('statusTitle');
-    const subtitle = document.getElementById('statusSubtitle');
-    const btn = document.getElementById('toggleBtn');
-
-    if (isMonitoring) {
-      ring.className = 'status-ring active';
-      ring.innerHTML = '<span style="font-size:20px;">&#x1F4E1;</span>';
-      title.textContent = 'Monitoring Active';
-      subtitle.textContent = 'Broadcasting location to 3 contacts';
-      btn.className = 'status-toggle deactivate';
-      btn.textContent = 'Stop Monitoring';
-      addActivity('Safety monitoring activated', 'var(--orange)', '&#x1F4E1;', 'var(--orange-dim)');
-      showToast('Monitoring activated - contacts notified');
-    } else {
-      ring.className = 'status-ring safe';
-      ring.innerHTML = '<span style="font-size:20px;">&#x1F6E1;</span>';
-      title.textContent = "You're Safe";
-      subtitle.textContent = 'Monitoring inactive - all clear';
-      btn.className = 'status-toggle activate';
-      btn.textContent = 'Activate Monitoring';
-      addActivity('Monitoring deactivated', 'var(--text-3)', '&#10003;', 'rgba(255,255,255,0.05)');
-      showToast('Monitoring stopped');
-    }
-  }
-
-  // ---- Panic Button ----
-  let panicTimer = null;
-  let panicTriggered = false;
-
-  function startPanicHold() {
-    if (panicTriggered) return;
-    const btn = document.getElementById('panicBtn');
-    btn.style.transform = 'scale(0.92)';
-    panicTimer = setTimeout(() => {
-      triggerPanic();
-    }, 1500);
-  }
-
-  function cancelPanicHold() {
-    clearTimeout(panicTimer);
-    const btn = document.getElementById('panicBtn');
-    if (!panicTriggered) {
-      btn.style.transform = 'scale(1)';
-    }
-  }
-
-  function triggerPanic() {
-    panicTriggered = true;
-    const btn = document.getElementById('panicBtn');
-    btn.classList.add('triggered');
-    btn.textContent = 'ALERT';
-    btn.style.transform = 'scale(1)';
-    addActivity('PANIC ALERT sent to 3 contacts', 'var(--red)', '&#9888;', 'var(--red-dim)');
-    showToast('Emergency alert dispatched to trusted contacts');
-
-    // Auto-reset after 4 seconds for demo
-    setTimeout(() => {
-      panicTriggered = false;
-      btn.classList.remove('triggered');
-      btn.textContent = 'SOS';
-      btn.style.transform = 'scale(1)';
-    }, 4000);
-  }
-
-  // ---- Activity Feed ----
-  const activityTemplates = [
-    { text: 'Check-in confirmed', color: 'var(--green)', icon: '&#10003;', bg: 'var(--green-dim)' },
-    { text: 'Location ping received', color: 'var(--blue)', icon: '&#x1F4CD;', bg: 'var(--blue-dim)' },
-    { text: 'Sarah M. acknowledged alert', color: '#5E5CE6', icon: '&#x1F4AC;', bg: 'rgba(94,92,230,0.15)' },
-    { text: 'Check-in timer reset', color: 'var(--orange)', icon: '&#9201;', bg: 'var(--orange-dim)' },
-    { text: 'James K. viewed your location', color: 'var(--blue)', icon: '&#x1F441;', bg: 'var(--blue-dim)' },
-    { text: 'Consent agreement reviewed', color: '#5E5CE6', icon: '&#x2665;', bg: 'rgba(94,92,230,0.15)' },
-    { text: 'Battery level reported: 87%', color: 'var(--green)', icon: '&#x1F50B;', bg: 'var(--green-dim)' },
-    { text: 'GPS signal updated', color: 'var(--blue)', icon: '&#x1F4E1;', bg: 'var(--blue-dim)' },
-  ];
-
-  let activityCount = 3;
-
-  function addActivity(text, dotColor, icon, iconBg) {
-    const feed = document.getElementById('activityFeed');
-    const item = document.createElement('div');
-    item.className = 'activity-item';
-    item.innerHTML = `
-      <div class="activity-icon" style="background:${iconBg};">${icon}</div>
-      <div class="activity-content">
-        <div class="activity-title">${text}</div>
-        <div class="activity-time">Just now</div>
-      </div>
-      <div class="activity-dot" style="background:${dotColor};"></div>
-    `;
-    feed.insertBefore(item, feed.firstChild);
-
-    // Keep max 5 items
-    while (feed.children.length > 5) {
-      feed.removeChild(feed.lastChild);
-    }
-
-    activityCount++;
-    document.getElementById('activityCount').textContent = activityCount + ' events';
-  }
-
-  // Auto-add random activities
-  function scheduleNextActivity() {
-    const delay = 6000 + Math.random() * 8000;
-    setTimeout(() => {
-      const t = activityTemplates[Math.floor(Math.random() * activityTemplates.length)];
-      addActivity(t.text, t.color, t.icon, t.bg);
-      scheduleNextActivity();
-    }, delay);
-  }
-
-  scheduleNextActivity();
-
-  // ---- Check-in Timer ----
-  let checkinMinutes = 25;
-  const totalMinutes = 30;
-
-  function updateCheckin() {
-    checkinMinutes = Math.max(0, checkinMinutes - 1);
-
-    if (checkinMinutes === 0) {
-      checkinMinutes = totalMinutes;
-      addActivity('Auto check-in sent', 'var(--green)', '&#10003;', 'var(--green-dim)');
-    }
-
-    document.getElementById('checkinValue').textContent = checkinMinutes;
-
-    const circumference = 213.6;
-    const progress = checkinMinutes / totalMinutes;
-    const offset = circumference * (1 - progress);
-    document.getElementById('checkinRing').style.strokeDashoffset = offset;
-
-    // Change badge color when running low
-    const badge = document.getElementById('checkinBadge');
-    if (checkinMinutes <= 5) {
-      badge.className = 'metric-badge badge-orange';
-      badge.textContent = 'Due Soon';
-    } else {
-      badge.className = 'metric-badge badge-green';
-      badge.textContent = 'Active';
-    }
-  }
-
-  // Update check-in every 10 seconds for demo
-  setInterval(updateCheckin, 10000);
-
-  // ---- Hero Stats Counter Animation ----
-  function animateCounter(el, start, end, duration) {
-    const range = end - start;
-    const startTime = performance.now();
-    function update(currentTime) {
-      const elapsed = currentTime - startTime;
-      const progress = Math.min(elapsed / duration, 1);
-      const eased = 1 - Math.pow(1 - progress, 3);
-      el.textContent = Math.round(start + range * eased).toLocaleString();
-      if (progress < 1) requestAnimationFrame(update);
-    }
-    requestAnimationFrame(update);
-  }
-
-  // Animate stats on load
-  setTimeout(() => {
-    animateCounter(document.getElementById('stat-users'), 0, 12847, 1800);
-    animateCounter(document.getElementById('stat-alerts'), 0, 3291, 1400);
-  }, 300);
-
-  // Live update stats every 5 seconds
-  let userCount = 12847;
-  let alertCount = 3291;
-
-  setInterval(() => {
-    userCount += Math.floor(Math.random() * 3);
-    alertCount += Math.floor(Math.random() * 2);
-    document.getElementById('stat-users').textContent = userCount.toLocaleString();
-    document.getElementById('stat-alerts').textContent = alertCount.toLocaleString();
-  }, 5000);
-
-  // ---- Location Accuracy Random Updates ----
-  const accuracyValues = ['3m', '4m', '5m', '3m', '6m', '4m', '3m'];
-  let accIdx = 0;
-
-  setInterval(() => {
-    accIdx = (accIdx + 1) % accuracyValues.length;
-    document.getElementById('locationAccuracy').textContent = accuracyValues[accIdx];
-
-    // Update chart bars
-    const bars = document.querySelectorAll('#locationChart .chart-bar');
-    bars.forEach((bar, i) => {
-      bar.classList.remove('active');
-      const h = 35 + Math.random() * 55;
-      bar.style.height = h + '%';
-    });
-    bars[bars.length - 1].classList.add('active');
-  }, 3500);
-</script>
+  <p class="footer-copy">&copy; 2025 Sanctuary. All rights reserved.</p>
+</div>
 
 </body>
 </html>
