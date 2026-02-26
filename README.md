@@ -8,7 +8,25 @@
 
 A dual-purpose personal safety and consent management iOS application. Sanctuary provides a lock-screen accessible panic button with real-time GPS alerting and a frictionless consent agreement system for partners.
 
-**Live Demo:** [https://sanctuary-ios-safety.vercel.app](https://sanctuary-ios-safety.vercel.app)
+**Live Demo:** [sanctuary-ios-safety.vercel.app](https://sanctuary-ios-safety.vercel.app)
+
+---
+
+## Table of Contents
+
+- [Overview](#overview)
+- [Architecture](#architecture)
+- [Design System](#design-system)
+- [Getting Started](#getting-started)
+- [Background Location Architecture](#background-location-architecture)
+- [Privacy and Security](#privacy-and-security)
+- [Database Schema](#database-schema)
+- [Key Features](#key-features)
+- [Supported Devices](#supported-devices)
+- [Development Standards](#development-standards)
+- [Contributing](#contributing)
+- [License](#license)
+- [Support](#support)
 
 ---
 
@@ -30,33 +48,33 @@ A non-legalistic communication tool for partners to express, document, and revie
 
 ```
 Sanctuary/
-├── App/
-│   ├── SanctuaryApp.swift        # @main entry point
-│   ├── DependencyContainer.swift # Centralized dependency injection
-│   └── ContentView.swift         # Root navigation view
-├── Core/
-│   ├── Models/                   # Codable, Sendable data models
-│   ├── Services/
-│   │   ├── AuthManager.swift     # Supabase authentication
-│   │   ├── SafetyLocationManager.swift  # CoreLocation, background sessions
-│   │   ├── HapticManager.swift   # Haptic feedback patterns
-│   │   └── SupabaseClientWrapper.swift  # API client configuration
-│   ├── Repositories/             # Data access layer (repository pattern)
-│   ├── Intents/                  # App Intents for WidgetKit interactivity
-│   └── Utilities/                # Extensions and helpers
-├── Features/
-│   ├── Auth/                     # Phone and email authentication
-│   ├── Dashboard/                # Main BentoGrid dashboard
-│   ├── Consent/                  # Card stack and QR code scanner
-│   ├── Safety/                   # Panic mode UI
-│   └── Settings/                 # User configuration
-├── UI/
-│   └── Theme/                    # Design tokens, colors, typography
-├── SanctuaryWidget/
-│   ├── SafetyWidget.swift        # Lock screen and home screen widget
-│   └── SafetyLiveActivityView.swift  # Dynamic Island and Live Activity
-└── Supabase/
-    └── schema.sql                # PostgreSQL schema with RLS policies
+  App/
+    SanctuaryApp.swift              Entry point
+    DependencyContainer.swift       Centralized dependency injection
+    ContentView.swift               Root navigation view
+  Core/
+    Models/                         Codable, Sendable data models
+    Services/
+      AuthManager.swift             Supabase authentication
+      SafetyLocationManager.swift   CoreLocation, background sessions
+      HapticManager.swift           Haptic feedback patterns
+      SupabaseClientWrapper.swift   API client configuration
+    Repositories/                   Data access layer (repository pattern)
+    Intents/                        App Intents for WidgetKit interactivity
+    Utilities/                      Extensions and helpers
+  Features/
+    Auth/                           Phone and email authentication
+    Dashboard/                      Main BentoGrid dashboard
+    Consent/                        Card stack and QR code scanner
+    Safety/                         Panic mode UI
+    Settings/                       User configuration
+  UI/
+    Theme/                          Design tokens, colors, typography
+SanctuaryWidget/
+  SafetyWidget.swift                Lock screen and home screen widget
+  SafetyLiveActivityView.swift      Dynamic Island and Live Activity
+Supabase/
+  schema.sql                        PostgreSQL schema with RLS policies
 ```
 
 **Design Pattern:** MVVM with a centralized `DependencyContainer` for dependency injection. All services use the `@Observable` macro. Thread-safe singletons use Swift `actor` isolation.
@@ -139,7 +157,7 @@ xcodebuild -scheme Sanctuary -destination 'platform=iOS Simulator,name=iPhone 16
 Sanctuary uses a layered approach to maintain continuous location tracking during active safety sessions:
 
 ```
-Widget Tap → ToggleSafetyMonitoringIntent (openAppWhenRun = true)
+Widget Tap -> ToggleSafetyMonitoringIntent (openAppWhenRun = true)
      |
      +-- CLBackgroundActivitySession    Prevents app suspension
      |
@@ -163,9 +181,9 @@ This pattern ensures location updates continue when the device is locked, the ap
 - No third-party analytics SDKs are included.
 - Location data is retained only for the duration of an active safety session.
 
-**Privacy Policy:** [https://sanctuary-ios-safety.vercel.app/privacy-policy.html](https://sanctuary-ios-safety.vercel.app/privacy-policy.html)
+**Privacy Policy:** [sanctuary-ios-safety.vercel.app/privacy-policy.html](https://sanctuary-ios-safety.vercel.app/privacy-policy.html)
 
-**Terms and Conditions:** [https://sanctuary-ios-safety.vercel.app/terms.html](https://sanctuary-ios-safety.vercel.app/terms.html)
+**Terms and Conditions:** [sanctuary-ios-safety.vercel.app/terms.html](https://sanctuary-ios-safety.vercel.app/terms.html)
 
 ---
 
@@ -182,18 +200,21 @@ This pattern ensures location updates continue when the device is locked, the ap
 
 ---
 
-## Key Feature Summary
+## Key Features
 
-**Lock Screen Widget**
+### Lock Screen Widget
+
 - Interactive WidgetKit extension supporting check-in and panic activation without unlocking the device
 - Dynamic Island Live Activity shows active monitoring status and elapsed time
 
-**Consent Card Interface**
+### Consent Card Interface
+
 - Swipe-to-accept interface across eight boundary categories
 - Custom notes per agreement
 - QR code partner linking
 
-**Panic and Safety Monitoring**
+### Panic and Safety Monitoring
+
 - Hold-to-activate panic button (1.5-second threshold prevents accidental triggers)
 - Dead Man's Switch with configurable intervals (15 minutes to 24 hours)
 - Automatic SMS dispatch to trusted contacts via Twilio A2P 10DLC-compliant messaging
