@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Privacy Policy - Sanctuary</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --black: #000000;
+      --surface: #0d0d0d;
+      --card: #141414;
+      --border: rgba(255,255,255,0.08);
+      --orange: #FF5F00;
+      --orange-dim: rgba(255,95,0,0.15);
+      --white: #ffffff;
+      --text-primary: #ffffff;
+      --text-secondary: rgba(255,255,255,0.65);
+      --text-tertiary: rgba(255,255,255,0.35);
+    }
+
+    html { background: var(--black); }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+      background: var(--black);
+      color: var(--text-primary);
+      line-height: 1.7;
+      min-height: 100vh;
+    }
+
+    header {
+      border-bottom: 1px solid var(--border);
+      padding: 20px 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo {
+      width: 36px;
+      height: 36px;
+      background: var(--orange);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .logo svg { width: 20px; height: 20px; fill: #fff; }
+
+    .brand { font-size: 18px; font-weight: 700; letter-spacing: -0.3px; }
+    .brand a { color: var(--white); text-decoration: none; }
+
+    main {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 60px 24px 80px;
+    }
+
+    .page-header { margin-bottom: 48px; }
+
+    .page-header h1 {
+      font-size: 36px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      margin-bottom: 8px;
+    }
+
+    .effective-date {
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    .effective-date span { color: var(--orange); }
+
+    .intro {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--orange);
+      border-radius: 12px;
+      padding: 20px 24px;
+      margin-bottom: 48px;
+      font-size: 15px;
+      color: var(--text-secondary);
+    }
+
+    section { margin-bottom: 44px; }
+
+    h2 {
+      font-size: 20px;
+      font-weight: 600;
+      letter-spacing: -0.2px;
+      margin-bottom: 16px;
+      color: var(--white);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    h2::before {
+      content: '';
+      display: inline-block;
+      width: 4px;
+      height: 20px;
+      background: var(--orange);
+      border-radius: 2px;
+      flex-shrink: 0;
+    }
+
+    p { font-size: 15px; color: var(--text-secondary); margin-bottom: 14px; }
+    p:last-child { margin-bottom: 0; }
+
+    ul {
+      list-style: none;
+      padding: 0;
+      margin: 14px 0;
+    }
+
+    ul li {
+      font-size: 15px;
+      color: var(--text-secondary);
+      padding: 6px 0 6px 20px;
+      position: relative;
+    }
+
+    ul li::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 15px;
+      width: 6px;
+      height: 6px;
+      background: var(--orange);
+      border-radius: 50%;
+    }
+
+    .contact-box {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .contact-box a { color: var(--orange); text-decoration: none; }
+    .contact-box a:hover { text-decoration: underline; }
+
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 24px;
+      text-align: center;
+      font-size: 13px;
+      color: var(--text-tertiary);
+    }
+
+    footer a { color: var(--text-secondary); text-decoration: none; margin: 0 12px; }
+    footer a:hover { color: var(--orange); }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <svg viewBox="0 0 24 24"><path d="M12 2L4 6v6c0 5.25 3.5 10.15 8 11.35C16.5 22.15 20 17.25 20 12V6L12 2z"/></svg>
+  </div>
+  <div class="brand"><a href="index.html">Sanctuary</a></div>
+</header>
+
+<main>
+  <div class="page-header">
+    <h1>Privacy Policy</h1>
+    <p class="effective-date">Effective Date: <span>January 1, 2025</span> &nbsp;|&nbsp; Last Updated: <span>February 2025</span></p>
+  </div>
+
+  <div class="intro">
+    Sanctuary ("we," "our," or "us") is committed to protecting your privacy. This Privacy Policy describes how we collect, use, and safeguard your personal information when you use the Sanctuary iOS application and related services.
+  </div>
+
+  <section>
+    <h2>Information We Collect</h2>
+    <p>We collect the following categories of information to provide our safety and consent management services:</p>
+    <ul>
+      <li><strong>Phone Number:</strong> Collected during account registration for SMS authentication via one-time passcodes (OTPs). Your phone number is your primary account identifier.</li>
+      <li><strong>Email Address:</strong> Optionally collected if you choose to sign up or sign in with email.</li>
+      <li><strong>Location Data:</strong> Collected only when you explicitly activate safety monitoring mode. Location data is used solely to share your position with your designated trusted contacts during an active safety session.</li>
+      <li><strong>Trusted Contact Information:</strong> Names and phone numbers of contacts you voluntarily add as trusted emergency contacts.</li>
+      <li><strong>Usage Data:</strong> Anonymized, aggregated data about app features used, for the purpose of improving the application.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>How We Use Your Information</h2>
+    <p>We use the information we collect for the following purposes:</p>
+    <ul>
+      <li>To verify your identity and authenticate your account using SMS one-time passcodes.</li>
+      <li>To provide the core safety monitoring features, including real-time location sharing with trusted contacts during an active emergency session.</li>
+      <li>To send SMS notifications to your trusted contacts on your behalf when you activate a safety alert.</li>
+      <li>To manage your consent agreements with partner users.</li>
+      <li>To improve, maintain, and operate the Sanctuary service.</li>
+      <li>To comply with applicable laws and regulations.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>SMS and Communications</h2>
+    <p>Sanctuary uses SMS messaging exclusively for the following purposes:</p>
+    <ul>
+      <li><strong>Authentication:</strong> One-time passcodes (OTPs) sent to verify your phone number during sign-up or login.</li>
+      <li><strong>Safety Alerts:</strong> Notifications sent to your designated trusted contacts when you activate panic mode or fail to complete a scheduled check-in.</li>
+    </ul>
+    <p>We do not send promotional, marketing, or advertising messages. You may opt out of SMS at any time by replying STOP to any Sanctuary message. Standard message and data rates may apply.</p>
+    <p>Your phone number will not be sold, rented, or shared with third parties for marketing purposes.</p>
+  </section>
+
+  <section>
+    <h2>Data Sharing and Third Parties</h2>
+    <p>We do not sell your personal information. We share data only in the following limited circumstances:</p>
+    <ul>
+      <li><strong>Supabase:</strong> Our backend database and authentication provider. Data is stored securely with row-level security policies ensuring only authorized users can access specific records.</li>
+      <li><strong>Twilio:</strong> Our SMS delivery provider, used solely to send OTP codes and safety alert messages. Twilio receives only the destination phone number and message content necessary for delivery.</li>
+      <li><strong>Trusted Contacts:</strong> Your location and safety status are shared with contacts you explicitly designate within the app.</li>
+      <li><strong>Legal Requirements:</strong> We may disclose information if required to do so by law or in response to a valid legal process.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Data Storage and Security</h2>
+    <p>Your data is stored on Supabase infrastructure with the following security measures:</p>
+    <ul>
+      <li>Row-Level Security (RLS) policies ensure users can only access their own data.</li>
+      <li>Authentication sessions are stored securely in the iOS Keychain.</li>
+      <li>All data is transmitted over encrypted HTTPS connections.</li>
+      <li>Location data is retained only for the duration of an active safety session and is deleted upon session termination.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Your Rights and Choices</h2>
+    <p>You have the following rights regarding your personal data:</p>
+    <ul>
+      <li><strong>Access:</strong> You may request a copy of the personal data we hold about you.</li>
+      <li><strong>Correction:</strong> You may update your profile information directly within the app.</li>
+      <li><strong>Deletion:</strong> You may request deletion of your account and all associated data by contacting us.</li>
+      <li><strong>Location Permissions:</strong> You can revoke location access at any time through iOS Settings. Note that revoking location access will disable safety monitoring features.</li>
+      <li><strong>SMS Opt-Out:</strong> Reply STOP to any Sanctuary SMS to opt out. Reply START to re-subscribe. Reply HELP for support information.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Children's Privacy</h2>
+    <p>Sanctuary is not intended for use by individuals under the age of 18. We do not knowingly collect personal information from children. If you believe we have inadvertently collected information from a minor, please contact us immediately.</p>
+  </section>
+
+  <section>
+    <h2>Changes to This Policy</h2>
+    <p>We may update this Privacy Policy from time to time. We will notify you of significant changes by updating the effective date at the top of this document. Continued use of the application after changes are posted constitutes your acceptance of the updated policy.</p>
+  </section>
+
+  <section>
+    <h2>Contact Us</h2>
+    <div class="contact-box">
+      <p>If you have questions about this Privacy Policy or your data, please contact us:</p>
+      <ul>
+        <li>Email: <a href="mailto:privacy@sanctuary.app">privacy@sanctuary.app</a></li>
+        <li>Support: <a href="mailto:support@sanctuary.app">support@sanctuary.app</a></li>
+      </ul>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <p>
+    <a href="index.html">Home</a>
+    <a href="privacy-policy.html">Privacy Policy</a>
+    <a href="terms.html">Terms and Conditions</a>
+  </p>
+  <p style="margin-top:12px;">&copy; 2025 Sanctuary. All rights reserved.</p>
+</footer>
+
+</body>
+</html>
