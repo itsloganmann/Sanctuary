@@ -1,0 +1,10 @@
+.build/
+.swiftpm/
+Sanctuary/
+Sanctuary.xcodeproj/
+SanctuaryTests/
+SanctuaryWidget/
+Supabase/
+*.xcodeproj
+*.xcworkspace
+*.xcuserstate
