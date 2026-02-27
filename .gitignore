@@ -122,3 +122,4 @@ Derived/
 
 # XcodeGen
 *.xcodeproj/
+.vercel
