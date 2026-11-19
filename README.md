@@ -8,7 +8,9 @@
 
 A dual-purpose personal safety and consent management iOS application. Sanctuary provides a lock-screen accessible panic button with real-time GPS alerting and a frictionless consent agreement system for partners.
 
-**Live Demo:** [sanctuary-ios-safety.vercel.app](https://sanctuary-ios-safety.vercel.app)
+**Live Demo:** [itsloganmann.github.io/Sanctuary](https://itsloganmann.github.io/Sanctuary)
+
+The static site is hosted on GitHub Pages from the `gh-pages` branch. Publish changes from `demo/` to that branch when updating the site.
 
 ---
 
@@ -181,9 +183,9 @@ This pattern ensures location updates continue when the device is locked, the ap
 - No third-party analytics SDKs are included.
 - Location data is retained only for the duration of an active safety session.
 
-**Privacy Policy:** [sanctuary-ios-safety.vercel.app/privacy-policy.html](https://sanctuary-ios-safety.vercel.app/privacy-policy.html)
+**Privacy Policy:** [itsloganmann.github.io/Sanctuary/privacy-policy.html](https://itsloganmann.github.io/Sanctuary/privacy-policy.html)
 
-**Terms and Conditions:** [sanctuary-ios-safety.vercel.app/terms.html](https://sanctuary-ios-safety.vercel.app/terms.html)
+**Terms and Conditions:** [itsloganmann.github.io/Sanctuary/terms.html](https://itsloganmann.github.io/Sanctuary/terms.html)
 
 ---
 
